@@ -1,0 +1,63 @@
+export type PeptideStatus = 'Research' | 'Approved (RU)' | 'FDA Approved' | 'Veterinary' | 'Approved (EU)';
+export type AdminRoute = 'SubQ' | 'IM' | 'Intranasal' | 'Oral' | 'Topical' | 'IV' | 'Sublingual';
+
+export interface Peptide {
+  id: string;
+  name: string;
+  emoji: string;
+  categoryId: string;
+  status: PeptideStatus;
+  shortDescription: string;
+  description: string;
+  halfLife?: string;
+  dosageRange?: string;
+  frequency?: string;
+  routes?: AdminRoute[];
+  benefits?: string[];
+  sideEffects?: string[];
+  contraindications?: string[];
+  synergies?: string[];
+  tags?: string[];
+  components?: string[]; // for blends
+  researchLinks?: string[];
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  subtitle: string;
+  emoji: string;
+  color: string;
+}
+
+export type NavSection = 'wiki' | 'recon' | 'stacks' | 'progress' | 'reminders' | 'guide' | 'ai';
+
+export interface Stack {
+  id: string;
+  name: string;
+  description: string;
+  peptides: string[];
+  goal: string;
+  createdAt: string;
+}
+
+export interface ProgressEntry {
+  id: string;
+  date: string;
+  peptideId: string;
+  dose: string;
+  route: AdminRoute;
+  notes: string;
+  rating: number;
+}
+
+export interface Reminder {
+  id: string;
+  peptideId: string;
+  time: string;
+  days: string[];
+  dose: string;
+  route: AdminRoute;
+  enabled: boolean;
+  note: string;
+}
