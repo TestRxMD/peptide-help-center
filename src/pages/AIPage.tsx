@@ -123,7 +123,7 @@ function getLocalResponse(query: string): string {
   if (matched) {
     return `**${matched.name}** ${matched.emoji}\n\n${matched.description}\n\n**Dosage:** ${matched.dosageRange ?? 'See reference'}\n**Half-life:** ${matched.halfLife ?? 'See reference'}\n**Routes:** ${matched.routes?.join(', ') ?? 'See reference'}\n${matched.benefits?.length ? `\n**Benefits:**\n${matched.benefits.map(b => `- ${b}`).join('\n')}` : ''}`;
   }
-  return `I can answer questions about peptides, dosing, reconstitution, stacks, and mechanisms. Try asking about:\n\n- BPC-157 or TB-500\n- CJC-1295/Ipamorelin (GH stack)\n- Epithalon (longevity)\n- Semax + Selank (cognition)\n- Reconstitution guide\n- Popular stacks and blends\n\nFor a personalized protocol, try the **Protocol Builder** tab.`;
+  return `I can answer questions about peptides, dosing math, reconstitution, mechanisms, and safety. Try asking about:\n\n- BPC-157 mechanism, benefits, and risks\n- CJC-1295/Ipamorelin (conservative GH stack)\n- Epithalon longevity protocol\n- Dosing calculation from a 3 mL vial\n- Reconstitution step-by-step\n- Conservative sleep and recovery stack\n\nFor a personalized protocol, try the **Protocol Builder** tab.\n\n*Tip: Add your Anthropic API key to Vercel to unlock full AI-generated responses.*`;
 }
 
 // ─── Streaming fetch ────────────────────────────────────────────────────────
@@ -217,7 +217,7 @@ export default function AIPage() {
   const [tab, setTab]             = useState<Tab>('chat');
   const [messages, setMessages]   = useState<Message[]>([{
     role: 'assistant',
-    content: `## Welcome to the Peptide Help Center AI\n\nI have deep knowledge of **${peptides.length} peptides** across **${categories.length} categories** — including dosing, mechanisms, stacks, safety, and protocol design.\n\nAsk me anything, or switch to the **Protocol Builder** tab for a guided protocol tailored to your goals.`,
+    content: `## The Peptide Atlas\n\nI explain peptides and research compounds using intermediate medical language in a clear, informational tone. I prioritize **conservative dosing**, safety, and evidence-based guidance across **${peptides.length} compounds** in **${categories.length} categories**.\n\nAsk me anything about mechanisms, dosing math, reconstitution, stacking, or safety — or use the **Protocol Builder** tab for a fully structured protocol tailored to your goals.`,
   }]);
   const [input, setInput]         = useState('');
   const [loading, setLoading]     = useState(false);
@@ -326,11 +326,14 @@ export default function AIPage() {
   }, [form, builderLoading, messages, appendChunk, finalizeStream]);
 
   const suggestions = [
-    'Build me a healing protocol for a knee injury',
-    'Best GH secretagogue stack?',
-    'How does Epithalon work?',
-    'Compare Semax vs Selank',
-    'What is the Wolverine Blend?',
+    'Conservative fat loss + joint support protocol (with recon math)',
+    'Explain BPC-157 mechanism, benefits, and risks',
+    'Calculate dosing from a 3 mL vial',
+    'GLP-1 vs lifestyle interventions for weight loss',
+    'Labs to consider before starting a peptide protocol',
+    'Conservative sleep and recovery stack',
+    'How long are reconstituted peptides stable?',
+    "I'm new — teach me syringe units and mcg vs mg",
   ];
 
   return (
@@ -341,10 +344,10 @@ export default function AIPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 3, letterSpacing: '-0.02em', fontFamily: "'DM Sans', sans-serif" }}>
-              AI Protocol Assistant
+              The Peptide Atlas
             </h1>
             <p style={{ color: 'var(--text-muted)', fontSize: 12.5 }}>
-              Peptide knowledge base + AI protocol builder
+              Evidence-based guidance · conservative dosing · reconstitution math
             </p>
           </div>
 
