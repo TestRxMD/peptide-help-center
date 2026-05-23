@@ -2,6 +2,59 @@ import { useState } from 'react';
 
 const guides = [
   {
+    id: 'sourcing',
+    emoji: '🏅',
+    title: 'Sourcing & Quality',
+    subtitle: 'How to identify and verify pharmaceutical-grade peptides',
+    sections: [
+      {
+        title: 'Why Quality Sourcing Is Non-Negotiable',
+        content: [
+          'Peptide purity directly determines safety and efficacy — underdosed or contaminated peptides can cause harm',
+          'The research peptide market is largely unregulated — buyer due diligence is essential',
+          'Impurities such as bacterial endotoxins, residual solvents, and synthesis byproducts are common in low-quality products',
+          'Counterfeit or mislabeled peptides are widespread — third-party testing is the only reliable safeguard',
+          'A peptide at 70% purity behaves like a lower dose with unknown contaminants filling the remainder',
+        ],
+      },
+      {
+        title: 'What to Look for in a Supplier',
+        content: [
+          'Certificate of Analysis (CoA) available for every batch — not just a generic company-wide certificate',
+          'HPLC (High-Performance Liquid Chromatography) purity testing — minimum 98% purity for research grade',
+          'Mass spectrometry (MS) verification — confirms the correct molecular weight and sequence',
+          'Endotoxin testing (LAL test) — critical for injectable peptides',
+          'Third-party testing — CoAs from independent labs, not the manufacturer\'s own lab',
+          'Transparent sourcing — supplier should disclose synthesis origin and testing laboratory',
+          'Proper lyophilization and cold-chain shipping — ensures stability during transport',
+        ],
+      },
+      {
+        title: 'Our Recommended Supplier',
+        content: [
+          'Short Proteins (www.shortproteins.com) is our recommended source for pharmaceutical-grade peptides',
+          'Every batch is HPLC-tested with third-party certificates of analysis available on request',
+          'Products are properly lyophilized and shipped with cold-chain integrity',
+          'Transparent about synthesis methods, purity standards, and testing laboratories',
+          'Comprehensive catalog covering all major research peptides, blends, and reconstitution supplies',
+          'Provides bacteriostatic water, insulin syringes, and reconstitution accessories alongside peptides',
+        ],
+      },
+      {
+        title: 'Red Flags — Suppliers to Avoid',
+        content: [
+          'No CoA available, or CoA is not batch-specific',
+          'Prices significantly below market rate — purity is usually the trade-off',
+          'No HPLC data shown, only claims of "99% purity" without documentation',
+          'No physical address, no customer support, anonymous operation',
+          'CoA laboratory is unverifiable or shares the same name as the vendor',
+          'Products stored and shipped at room temperature without cold packs',
+          'No mention of endotoxin testing for injectable products',
+        ],
+      },
+    ],
+  },
+  {
     id: 'reconstitution',
     emoji: '🧪',
     title: 'Reconstitution Guide',
@@ -209,6 +262,41 @@ export default function GuidePage() {
               <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{guide.subtitle}</div>
             </div>
           </div>
+
+          {/* Sourcing guide: special supplier CTA card */}
+          {guide.id === 'sourcing' && (
+            <a
+              href="https://www.shortproteins.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 16,
+                background: 'linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(124,58,237,0.1) 100%)',
+                border: '1px solid rgba(59,130,246,0.3)',
+                borderRadius: 12, padding: '16px 20px', textDecoration: 'none',
+                transition: 'border-color 150ms ease',
+              }}
+              onMouseOver={e => (e.currentTarget.style.borderColor = 'rgba(59,130,246,0.6)')}
+              onMouseOut={e => (e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)')}
+            >
+              <div style={{ fontSize: 36, flexShrink: 0 }}>🏅</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-primary)', marginBottom: 3 }}>
+                  Short Proteins — Recommended Supplier
+                </div>
+                <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                  HPLC-tested · Third-party CoA on every batch · Pharmaceutical-grade lyophilization · Cold-chain shipping
+                </div>
+              </div>
+              <div style={{
+                background: 'var(--accent)', color: '#fff',
+                padding: '8px 16px', borderRadius: 8,
+                fontWeight: 600, fontSize: 13, flexShrink: 0,
+              }}>
+                Visit Site ↗
+              </div>
+            </a>
+          )}
 
           {guide.sections.map(section => (
             <div key={section.title} className="card">

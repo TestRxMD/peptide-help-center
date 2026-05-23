@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { NavSection } from './types';
 import Navigation from './components/Navigation';
+import Footer from './components/Footer';
 import WikiPage from './pages/WikiPage';
 import ReconPage from './pages/ReconPage';
 import StacksPage from './pages/StacksPage';
@@ -23,9 +24,10 @@ export default function App() {
   }[section];
 
   return (
-    <div style={{ minHeight: '100vh' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navigation active={section} onNav={setSection} />
-      <main>{page}</main>
+      <main style={{ flex: 1 }}>{page}</main>
+      <Footer />
     </div>
   );
 }
