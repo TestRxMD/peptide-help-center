@@ -50,44 +50,46 @@ export default function WikiPage() {
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px' }}>
 
-      {/* Sourcing callout */}
+      {/* Sourcing callout — clean, text-forward */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 14,
-        background: 'linear-gradient(135deg, rgba(16,185,129,0.07) 0%, rgba(59,130,246,0.07) 100%)',
-        border: '1px solid rgba(16,185,129,0.25)',
-        borderRadius: 10, padding: '12px 16px',
-        marginBottom: 16, flexWrap: 'wrap',
+        display: 'flex', alignItems: 'center', gap: 16,
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderLeft: '3px solid var(--green)',
+        borderRadius: 'var(--radius)',
+        padding: '12px 16px', marginBottom: 20,
+        flexWrap: 'wrap',
       }}>
-        <span style={{ fontSize: 20, flexShrink: 0 }}>🏅</span>
         <div style={{ flex: 1, minWidth: 200, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-          <strong style={{ color: 'var(--text-primary)' }}>Quality sourcing is everything.</strong>
-          {' '}Always verify purity with a certificate of analysis (CoA). We recommend{' '}
+          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Sourcing matters.</span>
+          {' '}Always verify purity with a certificate of analysis. Recommended supplier:{' '}
           <a href="https://www.shortproteins.com" target="_blank" rel="noopener noreferrer"
-            style={{ color: '#34d399', fontWeight: 600, textDecoration: 'none' }}>
+            style={{ color: 'var(--green)', fontWeight: 600 }}>
             Short Proteins
           </a>
           {' '}— HPLC-tested, third-party verified on every batch.
         </div>
         <a href="https://www.shortproteins.com" target="_blank" rel="noopener noreferrer"
           style={{
-            fontSize: 12, fontWeight: 600, color: '#34d399',
-            border: '1px solid rgba(16,185,129,0.35)', borderRadius: 7,
+            fontSize: 12, fontWeight: 600, color: 'var(--green)',
+            border: '1px solid rgba(34,197,94,0.25)', borderRadius: 6,
             padding: '5px 12px', textDecoration: 'none', flexShrink: 0,
-            background: 'rgba(16,185,129,0.08)',
+            background: 'rgba(34,197,94,0.07)',
+            transition: 'background var(--t)',
           }}>
-          View Source ↗
+          Shop Short Proteins ↗
         </a>
       </div>
 
       {/* Top bar: search + filters */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ flex: 1, minWidth: 220, position: 'relative' }}>
-          <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', fontSize: 14, color: 'var(--text-muted)', pointerEvents: 'none' }}>🔍</span>
+          <svg style={{ position: 'absolute', left: 11, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search peptides, benefits, tags…"
-            style={{ paddingLeft: 36 }}
+            style={{ paddingLeft: 34 }}
           />
         </div>
         <select
@@ -103,11 +105,8 @@ export default function WikiPage() {
         </select>
 
         {compareIds.length > 0 && (
-          <button
-            className="btn-primary btn"
-            onClick={() => setShowCompare(true)}
-          >
-            ⚡ Compare ({compareIds.length})
+          <button className="btn-primary btn" onClick={() => setShowCompare(true)}>
+            Compare {compareIds.length} →
           </button>
         )}
       </div>
