@@ -337,7 +337,7 @@ export default function AIPage() {
   ];
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: '24px 16px', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 120px)', minHeight: 500 }}>
+    <div style={{ maxWidth: 860, margin: '0 auto', padding: '24px 16px 16px', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
 
       {/* Header */}
       <div style={{ marginBottom: 16, flexShrink: 0 }}>
@@ -388,8 +388,8 @@ export default function AIPage() {
       {tab === 'chat' && (
         <>
           {/* Messages */}
-          <div style={{
-            flex: 1, overflowY: 'auto',
+          <div data-scroll style={{
+            flex: 1, overflowY: 'auto', minHeight: 0,
             background: 'var(--bg-surface)', border: '1px solid var(--border)',
             borderRadius: 14, padding: '16px',
             display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 12,
@@ -440,8 +440,8 @@ export default function AIPage() {
             <div ref={bottomRef} />
           </div>
 
-          {/* Suggestions */}
-          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8, flexShrink: 0 }}>
+          {/* Suggestions — horizontal scroll on mobile, wrap on desktop */}
+          <div className="suggestion-chips" style={{ marginBottom: 8, flexShrink: 0 }}>
             {suggestions.map(s => (
               <button
                 key={s}
@@ -496,7 +496,7 @@ export default function AIPage() {
             {/* Goal */}
             <div style={{ marginBottom: 18 }}>
               <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-muted)', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>Primary Goal *</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 6 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 6 }}>
                 {GOALS.map(g => (
                   <button
                     key={g.value}
@@ -518,7 +518,7 @@ export default function AIPage() {
             </div>
 
             {/* Experience + Budget row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div className="recon-subgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
               <div>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-muted)', marginBottom: 6, fontFamily: "'DM Sans', sans-serif" }}>Experience Level</label>
                 <select value={form.experience} onChange={e => setForm(f => ({ ...f, experience: e.target.value }))}>

@@ -27,7 +27,7 @@ export default function ReconPage() {
         </p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="recon-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
 
         {/* Left: Inputs */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -86,7 +86,7 @@ export default function ReconPage() {
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 14, color: 'var(--text-primary)' }}>
               Vial Reconstitution
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="recon-subgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div>
                 <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Vial size (mg)</label>
                 <input type="number" value={vialMg} onChange={e => setVialMg(Number(e.target.value))} min={0.5} step={0.5} />
@@ -116,7 +116,7 @@ export default function ReconPage() {
               📐 Reconstitution Results
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="recon-subgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {[
                 { label: 'Concentration', value: `${concentration.toFixed(0)} mcg/mL`, highlight: true },
                 { label: 'Draw Volume', value: `${drawMl.toFixed(3)} mL`, highlight: true },

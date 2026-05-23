@@ -24,9 +24,9 @@ export default function App() {
   }[section];
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column' }}>
       <Navigation active={section} onNav={setSection} />
-      <main style={{ flex: 1 }}>{page}</main>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>{page}</main>
       <Footer />
     </div>
   );

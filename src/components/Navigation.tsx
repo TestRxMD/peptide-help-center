@@ -42,7 +42,7 @@ export default function Navigation({ active, onNav }: Props) {
             width: 24, height: 24, borderRadius: 6, flexShrink: 0,
             background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
           }} />
-          <span style={{
+          <span className="nav-wordmark" style={{
             fontSize: 13, fontWeight: 700,
             color: 'var(--text-primary)',
             letterSpacing: '-0.01em',
@@ -53,10 +53,9 @@ export default function Navigation({ active, onNav }: Props) {
         </div>
 
         {/* Nav items */}
-        <div style={{
+        <div className="nav-scroll" style={{
           display: 'flex', flex: 1,
           overflowX: 'auto', height: '100%',
-          msOverflowStyle: 'none', scrollbarWidth: 'none',
         }}>
           {items.map(item => {
             const isActive = active === item.id;
@@ -89,7 +88,7 @@ export default function Navigation({ active, onNav }: Props) {
         </div>
 
         {/* EDU badge */}
-        <div style={{
+        <div className="nav-edu-badge" style={{
           marginLeft: 16, flexShrink: 0,
           fontSize: 10, fontWeight: 700, letterSpacing: '0.08em',
           color: 'var(--text-muted)',
