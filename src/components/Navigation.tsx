@@ -7,7 +7,7 @@ interface Props {
   onNav: (s: NavSection) => void;
 }
 
-const items: { id: NavSection; label: string }[] = [
+const BASE_ITEMS: { id: NavSection; label: string }[] = [
   { id: 'wiki',      label: 'Wiki'      },
   { id: 'recon',     label: 'Recon'     },
   { id: 'stacks',    label: 'Stacks'    },
@@ -21,6 +21,10 @@ export default function Navigation({ active, onNav }: Props) {
   const { user, signOut, openAuth } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const initials = user?.email?.charAt(0).toUpperCase() ?? '';
+
+  const items = user
+    ? [...BASE_ITEMS, { id: 'dashboard' as NavSection, label: '⬡ Dashboard' }]
+    : BASE_ITEMS;
 
   return (
     <nav style={{
@@ -65,27 +69,31 @@ export default function Navigation({ active, onNav }: Props) {
         }}>
           {items.map(item => {
             const isActive = active === item.id;
+            const isDash = item.id === 'dashboard';
             return (
               <button
                 key={item.id}
                 onClick={() => onNav(item.id)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  padding: '0 16px', height: '100%',
+                  padding: isDash ? '0 14px' : '0 16px', height: '100%',
                   background: 'transparent',
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
-                  fontWeight: isActive ? 600 : 400,
-                  fontSize: 13, letterSpacing: '-0.01em',
+                  color: isActive
+                    ? (isDash ? '#a78bfa' : 'var(--text-primary)')
+                    : (isDash ? '#7c3aed' : 'var(--text-muted)'),
+                  fontWeight: isActive ? 600 : (isDash ? 500 : 400),
+                  fontSize: isDash ? 12.5 : 13, letterSpacing: '-0.01em',
                   whiteSpace: 'nowrap', flexShrink: 0,
                   position: 'relative',
                   transition: 'color var(--t)',
                   fontFamily: "'Inter', sans-serif",
                   borderBottom: isActive
-                    ? '1.5px solid var(--accent)'
+                    ? `1.5px solid ${isDash ? '#a78bfa' : 'var(--accent)'}`
                     : '1.5px solid transparent',
+                  marginLeft: isDash ? 4 : 0,
                 }}
-                onMouseOver={e => { if (!isActive) e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                onMouseOut={e => { if (!isActive) e.currentTarget.style.color = 'var(--text-muted)'; }}
+                onMouseOver={e => { if (!isActive) e.currentTarget.style.color = isDash ? '#a78bfa' : 'var(--text-secondary)'; }}
+                onMouseOut={e => { if (!isActive) e.currentTarget.style.color = isDash ? '#7c3aed' : 'var(--text-muted)'; }}
               >
                 {item.label}
               </button>
@@ -143,6 +151,21 @@ export default function Navigation({ active, onNav }: Props) {
                       <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>Signed in as</div>
                       <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
                     </div>
+                    <button
+                      onClick={() => { onNav('dashboard'); setMenuOpen(false); }}
+                      style={{
+                        width: '100%', textAlign: 'left', padding: '8px 10px',
+                        background: 'none', border: 'none', borderRadius: 6,
+                        fontSize: 13, color: 'var(--text-secondary)', cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        transition: 'background var(--t-fast)',
+                        marginBottom: 2,
+                      }}
+                      onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                      onMouseOut={e => e.currentTarget.style.background = 'none'}
+                    >
+                      ⬡ Client Dashboard
+                    </button>
                     <button
                       onClick={() => { signOut(); setMenuOpen(false); }}
                       style={{
