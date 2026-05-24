@@ -56,12 +56,14 @@ export default function Navigation({ active, onNav }: Props) {
               padding: 0, lineHeight: 0, display: 'flex', alignItems: 'center',
             }}
           >
-            <img
-              src="/logo.jpg"
-              alt="Peptide Help Center"
-              className="nav-logo"
-              style={{ height: 36, width: 'auto', objectFit: 'contain', display: 'block' }}
-            />
+            {/* Crop to icon-only: show left ~50% of the square image */}
+            <div className="nav-logo-wrap">
+              <img
+                src="/logo.jpg"
+                alt="Peptide Help Center"
+                className="nav-logo-img"
+              />
+            </div>
           </button>
         </div>
 

@@ -71,11 +71,21 @@ export default function Footer({ onNav }: Props) {
               padding: 0, lineHeight: 0, display: 'flex', alignItems: 'center',
             }}
           >
-            <img
-              src="/logo.jpg"
-              alt="Peptide Help Center"
-              style={{ height: 32, width: 'auto', objectFit: 'contain', display: 'block' }}
-            />
+            {/* Crop to icon-only: show left ~50% of the square image */}
+            <div style={{
+              width: 90, height: 88,
+              overflow: 'hidden', position: 'relative', flexShrink: 0,
+            }}>
+              <img
+                src="/logo.jpg"
+                alt="Peptide Help Center"
+                style={{
+                  height: 178, width: 'auto',
+                  position: 'absolute', left: 0, top: '50%',
+                  transform: 'translateY(-50%)',
+                }}
+              />
+            </div>
           </button>
 
           <div style={{ display: 'flex', gap: 20 }}>
