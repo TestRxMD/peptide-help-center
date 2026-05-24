@@ -29,9 +29,10 @@ export default function Navigation({ active, onNav }: Props) {
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 100,
-      background: 'rgba(10,17,30,0.92)',
-      backdropFilter: 'blur(24px) saturate(1.8)',
+      background: 'rgba(243,246,253,0.97)',
+      backdropFilter: 'blur(24px) saturate(1.6)',
       borderBottom: '1px solid var(--border)',
+      boxShadow: '0 1px 0 rgba(31,64,204,0.08)',
     }}>
       <div style={{
         maxWidth: 1100, margin: '0 auto',
@@ -40,26 +41,19 @@ export default function Navigation({ active, onNav }: Props) {
         gap: 0,
       }}>
 
-        {/* Wordmark / Logo area */}
+        {/* Logo */}
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 9,
-          paddingRight: 24, marginRight: 4,
+          paddingRight: 20, marginRight: 4,
           borderRight: '1px solid var(--border)',
           flexShrink: 0, height: '100%',
+          display: 'flex', alignItems: 'center',
         }}>
-          {/* Placeholder — swap this div for <img> when logo is ready */}
-          <div style={{
-            width: 24, height: 24, borderRadius: 6, flexShrink: 0,
-            background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-          }} />
-          <span className="nav-wordmark" style={{
-            fontSize: 13, fontWeight: 700,
-            color: 'var(--text-primary)',
-            letterSpacing: '-0.01em',
-            fontFamily: "'DM Sans', sans-serif",
-          }}>
-            Peptide Help Center
-          </span>
+          <img
+            src="/logo.png"
+            alt="Peptide Help Center"
+            className="nav-logo"
+            style={{ height: 36, width: 'auto', objectFit: 'contain', display: 'block' }}
+          />
         </div>
 
         {/* Nav items */}
