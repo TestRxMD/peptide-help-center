@@ -2,11 +2,22 @@ import type { ReactNode } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Props {
-  feature: 'progress' | 'ai';
+  feature: 'progress' | 'ai' | 'dashboard';
   children: ReactNode;
 }
 
 const CONFIG = {
+  dashboard: {
+    icon: '⬡',
+    title: 'Client Dashboard',
+    subtitle: 'Your personal health hub — labs, protocols, and progress.',
+    perks: [
+      'Log and track your lab draws over time',
+      'View your AI-generated protocol history',
+      'Complete activity log across all sessions',
+      'Personalized health data in one place',
+    ],
+  },
   progress: {
     icon: '📊',
     title: 'Progress Log',

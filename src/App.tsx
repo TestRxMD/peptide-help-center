@@ -11,6 +11,7 @@ import ProgressPage from './pages/ProgressPage';
 import RemindersPage from './pages/RemindersPage';
 import GuidePage from './pages/GuidePage';
 import AIPage from './pages/AIPage';
+import DashboardPage from './pages/DashboardPage';
 
 function AppInner() {
   const [section, setSection] = useState<NavSection>('wiki');
@@ -24,6 +25,7 @@ function AppInner() {
     reminders: <RemindersPage />,
     guide:     <GuidePage />,
     ai:        <AIPage />,
+    dashboard: <DashboardPage />,
   }[section];
 
   return (

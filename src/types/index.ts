@@ -30,7 +30,20 @@ export interface Category {
   color: string;
 }
 
-export type NavSection = 'wiki' | 'recon' | 'stacks' | 'progress' | 'reminders' | 'guide' | 'ai';
+export type NavSection = 'wiki' | 'recon' | 'stacks' | 'progress' | 'reminders' | 'guide' | 'ai' | 'dashboard';
+
+export interface LabDraw {
+  id: string;
+  drawn_date: string;
+  marker: string;
+  category?: string;
+  value: number;
+  unit: string;
+  ref_low?: number;
+  ref_high?: number;
+  notes?: string;
+  created_at?: string;
+}
 
 export interface Stack {
   id: string;
