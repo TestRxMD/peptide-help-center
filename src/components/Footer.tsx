@@ -1,4 +1,10 @@
-export default function Footer() {
+import type { NavSection } from '../types';
+
+interface Props {
+  onNav: (s: NavSection) => void;
+}
+
+export default function Footer({ onNav }: Props) {
   return (
     <footer style={{
       borderTop: '1px solid var(--border)',
@@ -14,7 +20,7 @@ export default function Footer() {
           borderLeft: '3px solid var(--accent)',
           borderRadius: 'var(--radius)',
           padding: '16px 20px', marginBottom: 28,
-          flexWrap: 'wrap', background: 'rgba(59,130,246,0.04)',
+          flexWrap: 'wrap', background: 'rgba(31,64,204,0.04)',
         }}>
           <div style={{ flex: 1, minWidth: 260 }}>
             <div style={{
@@ -57,20 +63,20 @@ export default function Footer() {
           display: 'flex', alignItems: 'center',
           justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: 20, height: 20, borderRadius: 5, flexShrink: 0,
-              background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-            }} />
-            <span style={{
-              fontWeight: 700, fontSize: 12,
-              color: 'var(--text-secondary)',
-              fontFamily: "'DM Sans', sans-serif",
-              letterSpacing: '-0.01em',
-            }}>
-              Peptide Help Center
-            </span>
-          </div>
+          <button
+            onClick={() => onNav('wiki')}
+            title="Go to homepage"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: 0, lineHeight: 0, display: 'flex', alignItems: 'center',
+            }}
+          >
+            <img
+              src="/logo.jpg"
+              alt="Peptide Help Center"
+              style={{ height: 32, width: 'auto', objectFit: 'contain', display: 'block' }}
+            />
+          </button>
 
           <div style={{ display: 'flex', gap: 20 }}>
             <a href="https://www.shortproteins.com" target="_blank" rel="noopener noreferrer"

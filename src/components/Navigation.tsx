@@ -41,19 +41,28 @@ export default function Navigation({ active, onNav }: Props) {
         gap: 0,
       }}>
 
-        {/* Logo */}
+        {/* Logo — click to go home */}
         <div style={{
           paddingRight: 20, marginRight: 4,
           borderRight: '1px solid var(--border)',
           flexShrink: 0, height: '100%',
           display: 'flex', alignItems: 'center',
         }}>
-          <img
-            src="/logo.jpg"
-            alt="Peptide Help Center"
-            className="nav-logo"
-            style={{ height: 36, width: 'auto', objectFit: 'contain', display: 'block' }}
-          />
+          <button
+            onClick={() => onNav('wiki')}
+            title="Go to homepage"
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: 0, lineHeight: 0, display: 'flex', alignItems: 'center',
+            }}
+          >
+            <img
+              src="/logo.jpg"
+              alt="Peptide Help Center"
+              className="nav-logo"
+              style={{ height: 36, width: 'auto', objectFit: 'contain', display: 'block' }}
+            />
+          </button>
         </div>
 
         {/* Nav items */}

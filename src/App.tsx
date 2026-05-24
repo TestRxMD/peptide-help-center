@@ -32,7 +32,7 @@ function AppInner() {
     <div style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column' }}>
       <Navigation active={section} onNav={setSection} />
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>{page}</main>
-      <Footer />
+      <Footer onNav={setSection} />
       {showAuthModal && <AuthModal />}
     </div>
   );
