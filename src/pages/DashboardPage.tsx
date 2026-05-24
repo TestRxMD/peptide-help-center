@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import type { LabDraw } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import AuthGate from '../components/AuthGate';
@@ -10,7 +10,12 @@ import {
   fetchProtocolHistory,
   fetchRecentActivity,
   fetchTopPeptideViews,
+  uploadLabFile,
+  fetchLabFiles,
+  getLabFileSignedUrl,
+  deleteLabFile,
 } from '../lib/supabase';
+import type { LabFile } from '../lib/supabase';
 import { getPeptideById } from '../data/peptides';
 
 // ── Lab marker presets ────────────────────────────────────────────
@@ -50,6 +55,181 @@ const MARKER_PRESETS: Record<string, { unit: string; ref_low?: number; ref_high?
 };
 
 // ── Helpers ───────────────────────────────────────────────────────
+
+// ── Lab file helpers ──────────────────────────────────────────────
+
+function formatBytes(bytes: number | null): string {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function fileIcon(type: string | null): string {
+  if (type === 'application/pdf') return '📄';
+  if (type?.startsWith('image/')) return '🖼️';
+  return '📎';
+}
+
+// ── Lab files upload section ──────────────────────────────────────
+
+function LabFilesSection({ userId }: { userId: string }) {
+  const [files, setFiles]         = useState<LabFile[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging]   = useState(false);
+  const [error, setError]         = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchLabFiles(userId).then(data => { setFiles(data); setLoading(false); });
+  }, [userId]);
+
+  const handleFiles = async (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    const allowed = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    const file = fileList[0];
+    if (!allowed.includes(file.type)) {
+      setError('Only PDF, JPG, and PNG files are supported.');
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      setError('File must be under 20 MB.');
+      return;
+    }
+    setError('');
+    setUploading(true);
+    const result = await uploadLabFile(userId, file);
+    if (result) setFiles(prev => [result, ...prev]);
+    else setError('Upload failed — make sure the "lab-results" storage bucket is created in Supabase.');
+    setUploading(false);
+  };
+
+  const handleView = async (file: LabFile) => {
+    const url = await getLabFileSignedUrl(file.file_path);
+    if (url) window.open(url, '_blank', 'noopener');
+    else setError('Could not generate view link. Try again.');
+  };
+
+  const handleDelete = async (file: LabFile) => {
+    setFiles(prev => prev.filter(f => f.id !== file.id));
+    await deleteLabFile(file.id, file.file_path);
+  };
+
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragging(false);
+    handleFiles(e.dataTransfer.files);
+  };
+
+  return (
+    <div style={{ marginTop: 28 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div>
+          <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>Lab Reports</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 1 }}>Upload full lab panels — PDF, JPG, or PNG</div>
+        </div>
+        <button
+          className="btn btn-primary"
+          onClick={() => inputRef.current?.click()}
+          style={{ fontSize: 12, padding: '6px 14px' }}
+        >
+          + Upload File
+        </button>
+      </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+        style={{ display: 'none' }}
+        onChange={e => handleFiles(e.target.files)}
+      />
+
+      {/* Drop zone */}
+      <div
+        onDragOver={e => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={onDrop}
+        onClick={() => inputRef.current?.click()}
+        style={{
+          border: `2px dashed ${dragging ? 'var(--accent)' : 'var(--border-light)'}`,
+          borderRadius: 'var(--radius-lg)',
+          padding: '20px 16px',
+          textAlign: 'center',
+          cursor: 'pointer',
+          background: dragging ? 'var(--accent-dim)' : 'var(--bg-subtle)',
+          transition: 'all 150ms ease',
+          marginBottom: 14,
+        }}
+      >
+        <div style={{ fontSize: 28, marginBottom: 6 }}>
+          {uploading ? '⏳' : '📂'}
+        </div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 3 }}>
+          {uploading ? 'Uploading…' : 'Drag & drop or click to upload'}
+        </div>
+        <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>
+          PDF, JPG, PNG · max 20 MB
+        </div>
+      </div>
+
+      {error && (
+        <div style={{
+          padding: '8px 12px', borderRadius: 8, marginBottom: 12,
+          background: 'var(--red-dim)', border: '1px solid rgba(220,38,38,0.2)',
+          fontSize: 12.5, color: 'var(--red)',
+        }}>
+          {error}
+        </div>
+      )}
+
+      {/* File list */}
+      {loading ? (
+        <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', padding: '12px 0' }}>Loading files…</div>
+      ) : files.length === 0 ? (
+        <div style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', padding: '8px 0' }}>
+          No files uploaded yet.
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {files.map(f => (
+            <div key={f.id} className="card" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px' }}>
+              <div style={{ fontSize: 22, flexShrink: 0 }}>{fileIcon(f.file_type)}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {f.file_name}
+                </div>
+                <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>
+                  {new Date(f.uploaded_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  {f.file_size ? ` · ${formatBytes(f.file_size)}` : ''}
+                </div>
+              </div>
+              <button
+                onClick={() => handleView(f)}
+                style={{
+                  background: 'var(--accent-dim)', border: '1px solid rgba(31,64,204,0.2)',
+                  color: 'var(--accent)', fontSize: 12, fontWeight: 600,
+                  padding: '4px 10px', borderRadius: 6, cursor: 'pointer',
+                  flexShrink: 0, fontFamily: 'inherit',
+                }}
+              >
+                View ↗
+              </button>
+              <button
+                onClick={() => handleDelete(f)}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 14, cursor: 'pointer', padding: '0 2px', flexShrink: 0 }}
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function inRange(draw: LabDraw): boolean | null {
   if (draw.ref_low == null && draw.ref_high == null) return null;
@@ -157,13 +337,13 @@ function OverviewTab({ userId }: { userId: string }) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {topPeps.map(p => (
               <div key={p.name} style={{
-                background: 'rgba(59,130,246,0.08)',
-                border: '1px solid rgba(59,130,246,0.2)',
+                background: 'var(--accent-dim)',
+                border: '1px solid var(--border-light)',
                 borderRadius: 8, padding: '6px 12px',
                 display: 'flex', alignItems: 'center', gap: 8,
               }}>
                 <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>{p.name}</span>
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'rgba(59,130,246,0.15)', padding: '1px 6px', borderRadius: 4 }}>{p.count}×</span>
+                <span style={{ fontSize: 11, color: 'var(--accent)', background: 'var(--accent-dim)', padding: '1px 6px', borderRadius: 4 }}>{p.count}×</span>
               </div>
             ))}
           </div>
@@ -388,7 +568,7 @@ function LabDrawsTab({ userId }: { userId: string }) {
                         <span style={{ fontWeight: 700, fontSize: 13.5, color: 'var(--text-primary)' }}>{draw.marker}</span>
                         <span style={{
                           fontSize: 15, fontWeight: 800,
-                          color: ok === false ? '#f87171' : ok === true ? '#4ade80' : 'var(--text-secondary)',
+                          color: ok === false ? 'var(--red)' : ok === true ? 'var(--green)' : 'var(--text-secondary)',
                         }}>
                           {draw.value} <span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>{draw.unit}</span>
                         </span>
@@ -413,6 +593,9 @@ function LabDrawsTab({ userId }: { userId: string }) {
           </div>
         ))
       )}
+
+      {/* File uploads — always visible */}
+      <LabFilesSection userId={userId} />
     </div>
   );
 }

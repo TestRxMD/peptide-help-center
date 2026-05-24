@@ -133,6 +133,63 @@ export async function fetchRecentActivity(userId: string) {
   return data ?? [];
 }
 
+// ── Lab file uploads ──────────────────────────────────────────────
+
+export interface LabFile {
+  id: string;
+  user_id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number | null;
+  file_type: string | null;
+  uploaded_at: string;
+}
+
+export async function uploadLabFile(userId: string, file: File): Promise<LabFile | null> {
+  if (!supabase) return null;
+  const ext  = file.name.split('.').pop() ?? 'bin';
+  const path = `${userId}/${crypto.randomUUID()}.${ext}`;
+
+  const { error: uploadErr } = await supabase.storage
+    .from('lab-results')
+    .upload(path, file, { contentType: file.type, upsert: false });
+
+  if (uploadErr) return null;
+
+  const { data, error } = await supabase
+    .from('lab_files')
+    .insert({ user_id: userId, file_name: file.name, file_path: path, file_size: file.size, file_type: file.type })
+    .select()
+    .single();
+
+  if (error) return null;
+  return data as LabFile;
+}
+
+export async function fetchLabFiles(userId: string): Promise<LabFile[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from('lab_files')
+    .select('*')
+    .eq('user_id', userId)
+    .order('uploaded_at', { ascending: false });
+  return (data ?? []) as LabFile[];
+}
+
+export async function getLabFileSignedUrl(filePath: string): Promise<string | null> {
+  if (!supabase) return null;
+  const { data } = await supabase.storage
+    .from('lab-results')
+    .createSignedUrl(filePath, 3600); // 1-hour expiry
+  return data?.signedUrl ?? null;
+}
+
+export async function deleteLabFile(id: string, filePath: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.storage.from('lab-results').remove([filePath]);
+  await supabase.from('lab_files').delete().eq('id', id);
+}
+
 // ── Top peptide views ─────────────────────────────────────────────
 
 export async function fetchTopPeptideViews(userId: string) {
