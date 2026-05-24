@@ -396,28 +396,25 @@ footer {
   padding-bottom: max(28px, env(safe-area-inset-bottom));
 }
 
-/* Nav logo crop — shows only the icon portion (left ~50%) of the square logo */
-.nav-logo-wrap {
-  width: 52px;
-  height: 50px;
-  overflow: hidden;
-  position: relative;
+/* Logos — full image, no cropping */
+.nav-logo {
+  height: 44px;
+  width: auto;
+  object-fit: contain;
+  display: block;
   flex-shrink: 0;
 }
-.nav-logo-img {
-  height: 104px;
+.footer-logo {
+  height: 130px;
   width: auto;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  object-fit: contain;
+  display: block;
 }
 
-/* Mobile nav — hide EDU badge and shrink logo on small screens */
+/* Mobile nav — hide EDU badge and shrink logo */
 @media (max-width: 500px) {
   .nav-edu-badge { display: none; }
-  .nav-logo-wrap { width: 36px; height: 34px; }
-  .nav-logo-img  { height: 72px; }
+  .nav-logo      { height: 30px; }
 }
 @media (max-width: 680px) {
   .nav-edu-badge { display: none; }
