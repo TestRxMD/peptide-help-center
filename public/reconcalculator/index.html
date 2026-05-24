@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Peptide Reconstitution Calculator | Peptide Help Center</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:        #1d4ed8;
+      --blue-light:  #3b82f6;
+      --blue-pale:   #eff6ff;
+      --blue-ring:   #93c5fd;
+      --green:       #16a34a;
+      --amber:       #d97706;
+      --amber-pale:  #fffbeb;
+      --red:         #dc2626;
+      --red-pale:    #fef2f2;
+      --bg:          #f1f5f9;
+      --card:        #ffffff;
+      --text:        #0f172a;
+      --muted:       #64748b;
+      --border:      #e2e8f0;
+      --radius:      16px;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,.07), 0 4px 12px rgba(0,0,0,.05);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    .site-header {
+      background: var(--blue);
+      background-image: linear-gradient(135deg, #1e40af 0%, #1d4ed8 60%, #2563eb 100%);
+      color: #fff;
+      padding: 24px 20px 32px;
+      text-align: center;
+    }
+    .site-header .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 99px;
+      padding: 4px 14px 4px 8px;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      margin-bottom: 12px;
+    }
+    .site-header h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -.02em; }
+    .site-header p  { font-size: .8125rem; opacity: .75; margin-top: 4px; }
+
+    /* ── Layout ─────────────────────────────────── */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 14px 60px;
+    }
+
+    /* ── Step Cards ──────────────────────────────── */
+    .step-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .step-hd {
+      padding: 16px 18px 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .step-num {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: .7rem;
+      font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: background .2s;
+    }
+    .step-num.done { background: var(--green); }
+    .step-title {
+      font-size: .9375rem;
+      font-weight: 700;
+      line-height: 1.35;
+      padding-top: 4px;
+    }
+    .step-body { padding: 0 18px 18px; }
+
+    /* ── Syringe Cards ───────────────────────────── */
+    .syringe-row {
+      display: flex;
+      gap: 8px;
+    }
+    .syr-card {
+      flex: 1;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+      cursor: pointer;
+      text-align: center;
+      padding: 12px 6px 10px;
+      transition: border-color .15s, background .15s, box-shadow .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .syr-card:hover { border-color: var(--blue-light); }
+    .syr-card.selected {
+      border-color: var(--blue);
+      background: var(--blue-pale);
+      box-shadow: 0 0 0 3px rgba(59,130,246,.15);
+    }
+    .syr-card svg { width: 100%; height: 34px; }
+    .syr-card .syr-ml  { display: block; font-size: 1rem; font-weight: 800; margin-top: 6px; }
+    .syr-card .syr-sub { display: block; font-size: .7rem; color: var(--muted); }
+
+    /* ── Preset Pill Buttons ─────────────────────── */
+    .preset-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .pill {
+      padding: 9px 17px;
+      border-radius: 99px;
+      border: 2px solid var(--border);
+      background: #fff;
+      font-size: .875rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color .13s, background .13s, color .13s;
+      -webkit-tap-highlight-color: transparent;
+      white-space: nowrap;
+    }
+    .pill:hover { border-color: var(--blue-light); color: var(--blue); }
+    .pill.selected { background: var(--blue); border-color: var(--blue); color: #fff; }
+
+    /* ── Custom Input ────────────────────────────── */
+    .custom-wrap { display: none; margin-top: 10px; align-items: center; gap: 8px; }
+    .custom-wrap.show { display: flex; }
+    .custom-wrap input {
+      width: 110px;
+      padding: 9px 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: .9375rem;
+      font-weight: 700;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s;
+      -webkit-appearance: none;
+    }
+    .custom-wrap input:focus { border-color: var(--blue); }
+    .custom-wrap .unit { font-size: .8125rem; color: var(--muted); font-weight: 500; }
+
+    /* ── Result Card ─────────────────────────────── */
+    .result-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px;
+      overflow: hidden;
+      display: none;
+    }
+    .result-card.show { display: block; }
+
+    .result-hero {
+      background: linear-gradient(135deg, #1e40af, #2563eb);
+      color: #fff;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .rh-tag {
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 99px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      margin-bottom: 10px;
+    }
+    .rh-instruction { font-size: .875rem; opacity: .82; margin-bottom: 3px; }
+    .rh-dose        { font-size: 1.1rem; font-weight: 700; margin-bottom: 3px; }
+    .rh-pull        { font-size: .875rem; opacity: .82; margin-bottom: 8px; }
+    .rh-units       { font-size: 3.5rem; font-weight: 900; letter-spacing: -.04em; line-height: 1; }
+    .rh-ulabel      { font-size: 1rem; opacity: .75; margin-top: 2px; letter-spacing: .06em; font-weight: 600; }
+    .rh-ml          { font-size: .8125rem; opacity: .65; margin-top: 5px; }
+
+    .result-body    { padding: 18px; }
+
+    .syringe-wrap   { width: 100%; }
+    .syringe-wrap svg { width: 100%; height: auto; display: block; }
+
+    .warn-box {
+      display: flex; gap: 10px; align-items: flex-start;
+      padding: 11px 13px;
+      border-radius: 9px;
+      font-size: .8125rem;
+      line-height: 1.5;
+      margin-top: 12px;
+    }
+    .warn-box.amber { background: var(--amber-pale); border: 1.5px solid #fbbf24; color: #78350f; }
+    .warn-box.red   { background: var(--red-pale);   border: 1.5px solid #f87171; color: #7f1d1d; }
+    .warn-box .wi   { flex-shrink: 0; margin-top: 1px; }
+
+    .stat-grid { margin-top: 14px; }
+    .stat-row {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: .875rem;
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .stat-row .sl { color: var(--muted); }
+    .stat-row .sv { font-weight: 700; color: var(--text); }
+
+    /* ── QR Share Card ───────────────────────────── */
+    .share-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+    .share-card h3 { font-size: .9375rem; font-weight: 700; }
+    .share-card p  { font-size: .8rem; color: var(--muted); margin-top: 3px; margin-bottom: 16px; }
+
+    #qr-box {
+      display: inline-block;
+      padding: 10px;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    #qr-box canvas, #qr-box img { display: block; }
+
+    .url-chip {
+      font-family: monospace;
+      font-size: .72rem;
+      color: var(--muted);
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 7px 12px;
+      margin-bottom: 12px;
+      word-break: break-all;
+      text-align: left;
+    }
+    .copy-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 22px;
+      border-radius: 99px;
+      border: 2px solid var(--blue);
+      background: #fff;
+      color: var(--blue);
+      font-size: .875rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .copy-btn:hover { background: var(--blue); color: #fff; }
+    .copy-btn.ok    { background: var(--green); border-color: var(--green); color: #fff; }
+
+    /* ── Reconstitution Guide ────────────────────── */
+    .guide-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .guide-toggle {
+      width: 100%;
+      padding: 17px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: none; border: none; cursor: pointer;
+      font-size: .9375rem; font-weight: 700; color: var(--text);
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .guide-chevron { color: var(--muted); font-size: .9rem; transition: transform .22s; }
+    .guide-toggle.open .guide-chevron { transform: rotate(180deg); }
+    .guide-body { display: none; padding: 0 18px 18px; }
+    .guide-body.open { display: block; }
+
+    .g-section { margin-bottom: 16px; }
+    .g-section:last-child { margin-bottom: 0; }
+    .g-section h4 {
+      font-size: .8125rem; font-weight: 700;
+      color: var(--blue);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: 7px;
+    }
+    .g-section ul { list-style: none; padding: 0; }
+    .g-section li {
+      font-size: .8375rem; color: #334155; line-height: 1.6;
+      padding: 2px 0 2px 16px;
+      position: relative;
+    }
+    .g-section li::before { content: '·'; position: absolute; left: 4px; color: var(--blue); font-weight: 900; font-size: 1rem; }
+    .g-section li strong { font-weight: 700; }
+
+    /* ── Disclaimer ──────────────────────────────── */
+    .disclaimer {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      padding: 15px 18px;
+      font-size: .73rem;
+      color: var(--muted);
+      line-height: 1.6;
+      text-align: center;
+    }
+    .disclaimer strong { display: block; font-size: .78rem; color: #475569; margin-bottom: 3px; }
+
+    /* ── Responsive ──────────────────────────────── */
+    @media (max-width: 380px) {
+      .syringe-row { flex-direction: column; }
+      .syr-card { display: flex; align-items: center; gap: 12px; padding: 10px 14px; text-align: left; }
+      .syr-card svg { width: 80px; height: 28px; flex-shrink: 0; }
+      .syr-card .syr-ml  { font-size: .9rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="badge">🧪 Peptide Help Center</div>
+  <h1>Peptide Reconstitution Calculator</h1>
+  <p>Step-by-step dosing guide for research use</p>
+</header>
+
+<div class="container">
+
+  <!-- ── Step 1: Syringe Size ────────────────────── -->
+  <div class="step-card">
+    <div class="step-hd">
+      <div class="step-num" id="n1">1</div>
+      <div class="step-title">What is the total volume of your syringe?</div>
+    </div>
+    <div class="step-body">
+      <div class="syringe-row">
+
+        <!-- 0.3 mL -->
+        <div class="syr-card" id="sc-30" onclick="pickSyringe(30, this)">
+          <svg viewBox="0 0 110 38" xmlns="http://www.w3.org/2000/svg">
+            <rect x="18" y="11" width="66" height="16" rx="3" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1.5"/>
+            <rect x="19" y="12" width="18" height="14" rx="2" fill="#6366f1"/>
+            <rect x="6"  y="7"  width="12" height="24" rx="2" fill="#4f46e5"/>
+            <rect x="84" y="11" width="20" height="16" rx="2" fill="#c7d2fe"/>
+            <line x1="104" y1="19" x2="108" y2="19" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
+            <line x1="37" y1="11" x2="37" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="56" y1="11" x2="56" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="75" y1="11" x2="75" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+          </svg>
+          <span class="syr-ml">0.3 mL</span>
+          <span class="syr-sub">30 units</span>
+        </div>
+
+        <!-- 0.5 mL -->
+        <div class="syr-card" id="sc-50" onclick="pickSyringe(50, this)">
+          <svg viewBox="0 0 110 38" xmlns="http://www.w3.org/2000/svg">
+            <rect x="18" y="11" width="66" height="16" rx="3" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1.5"/>
+            <rect x="19" y="12" width="28" height="14" rx="2" fill="#6366f1"/>
+            <rect x="6"  y="7"  width="12" height="24" rx="2" fill="#4f46e5"/>
+            <rect x="84" y="11" width="20" height="16" rx="2" fill="#c7d2fe"/>
+            <line x1="104" y1="19" x2="108" y2="19" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
+            <line x1="31" y1="11" x2="31" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="47" y1="11" x2="47" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="63" y1="11" x2="63" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="79" y1="11" x2="79" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+          </svg>
+          <span class="syr-ml">0.5 mL</span>
+          <span class="syr-sub">50 units</span>
+        </div>
+
+        <!-- 1.0 mL -->
+        <div class="syr-card" id="sc-100" onclick="pickSyringe(100, this)">
+          <svg viewBox="0 0 110 38" xmlns="http://www.w3.org/2000/svg">
+            <rect x="18" y="11" width="66" height="16" rx="3" fill="#e0e7ff" stroke="#a5b4fc" stroke-width="1.5"/>
+            <rect x="19" y="12" width="8" height="14" rx="2" fill="#6366f1"/>
+            <rect x="6"  y="7"  width="12" height="24" rx="2" fill="#4f46e5"/>
+            <rect x="84" y="11" width="20" height="16" rx="2" fill="#c7d2fe"/>
+            <line x1="104" y1="19" x2="108" y2="19" stroke="#a5b4fc" stroke-width="2" stroke-linecap="round"/>
+            <line x1="27" y1="11" x2="27" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="36" y1="11" x2="36" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="47" y1="11" x2="47" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="57" y1="11" x2="57" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="67" y1="11" x2="67" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+            <line x1="77" y1="11" x2="77" y2="16" stroke="#818cf8" stroke-width="1.2"/>
+          </svg>
+          <span class="syr-ml">1.0 mL</span>
+          <span class="syr-sub">100 units</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Step 2: Vial Size ────────────────────────── -->
+  <div class="step-card">
+    <div class="step-hd">
+      <div class="step-num" id="n2">2</div>
+      <div class="step-title">How much peptide is in your vial?</div>
+    </div>
+    <div class="step-body">
+      <div class="preset-row">
+        <button class="pill" onclick="pickPreset('vial', 5, this)">5 mg</button>
+        <button class="pill" onclick="pickPreset('vial', 10, this)">10 mg</button>
+        <button class="pill" onclick="pickPreset('vial', 15, this)">15 mg</button>
+        <button class="pill" onclick="showCustom('vial', this)">Other</button>
+      </div>
+      <div class="custom-wrap" id="vial-cw">
+        <input type="number" id="vial-ci" placeholder="e.g. 10" min="0.001" step="any"
+               oninput="typedCustom('vial', this.value)" />
+        <span class="unit">mg</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Step 3: BAC Water ────────────────────────── -->
+  <div class="step-card">
+    <div class="step-hd">
+      <div class="step-num" id="n3">3</div>
+      <div class="step-title">How much bacteriostatic water are you adding?</div>
+    </div>
+    <div class="step-body">
+      <div class="preset-row">
+        <button class="pill" onclick="pickPreset('bac', 1, this)">1 mL</button>
+        <button class="pill" onclick="pickPreset('bac', 2, this)">2 mL</button>
+        <button class="pill" onclick="pickPreset('bac', 3, this)">3 mL</button>
+        <button class="pill" onclick="pickPreset('bac', 5, this)">5 mL</button>
+        <button class="pill" onclick="showCustom('bac', this)">Other</button>
+      </div>
+      <div class="custom-wrap" id="bac-cw">
+        <input type="number" id="bac-ci" placeholder="e.g. 2" min="0.001" step="any"
+               oninput="typedCustom('bac', this.value)" />
+        <span class="unit">mL</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Step 4: Dose ──────────────────────────────── -->
+  <div class="step-card">
+    <div class="step-hd">
+      <div class="step-num" id="n4">4</div>
+      <div class="step-title">How much peptide do you want per dose?</div>
+    </div>
+    <div class="step-body">
+      <div class="preset-row">
+        <button class="pill" onclick="pickPreset('dose', 50, this)">50 mcg</button>
+        <button class="pill" onclick="pickPreset('dose', 100, this)">100 mcg</button>
+        <button class="pill" onclick="pickPreset('dose', 250, this)">250 mcg</button>
+        <button class="pill" onclick="pickPreset('dose', 500, this)">500 mcg</button>
+        <button class="pill" onclick="pickPreset('dose', 1000, this)">1000 mcg</button>
+        <button class="pill" onclick="showCustom('dose', this)">Other</button>
+      </div>
+      <div class="custom-wrap" id="dose-cw">
+        <input type="number" id="dose-ci" placeholder="e.g. 500" min="0.001" step="any"
+               oninput="typedCustom('dose', this.value)" />
+        <span class="unit">mcg</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Result ─────────────────────────────────────── -->
+  <div class="result-card" id="result-card">
+
+    <div class="result-hero" id="result-hero">
+      <div class="rh-tag">Your Dose</div>
+      <div class="rh-instruction">To have a dose of</div>
+      <div class="rh-dose" id="rh-dose">—</div>
+      <div class="rh-pull">pull the syringe to</div>
+      <div class="rh-units" id="rh-units">—</div>
+      <div class="rh-ulabel">UNITS</div>
+      <div class="rh-ml" id="rh-ml">—</div>
+    </div>
+
+    <div class="result-body">
+      <!-- SVG Syringe -->
+      <div class="syringe-wrap">
+        <svg id="syr-main" viewBox="0 0 520 118"
+             xmlns="http://www.w3.org/2000/svg"
+             preserveAspectRatio="xMidYMid meet">
+        </svg>
+      </div>
+
+      <!-- Warnings -->
+      <div id="w-syringe" class="warn-box red" style="display:none">
+        <span class="wi">⚠️</span>
+        <span>Your syringe is too small for this dose. Choose a larger syringe or use more BAC water to lower the concentration.</span>
+      </div>
+      <div id="w-vol" class="warn-box amber" style="display:none">
+        <span class="wi">⚠️</span>
+        <span>Draw volume is greater than 1 mL — consider splitting into two injections or adjusting your reconstitution volume.</span>
+      </div>
+      <div id="w-dose" class="warn-box red" style="display:none">
+        <span class="wi">⚠️</span>
+        <span>Desired dose exceeds total peptide in the vial.</span>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-grid">
+        <div class="stat-row">
+          <span class="sl">Concentration</span>
+          <span class="sv" id="r-conc">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="sl">Doses per vial</span>
+          <span class="sv" id="r-doses">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="sl">Full complete doses</span>
+          <span class="sv" id="r-full">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Share / QR ─────────────────────────────────── -->
+  <div class="share-card">
+    <h3>📱 Share This Calculator</h3>
+    <p>Send clients directly to this tool via link or QR code</p>
+    <div id="qr-box"></div>
+    <div class="url-chip" id="url-chip"></div>
+    <button class="copy-btn" id="copy-btn" onclick="copyLink()">
+      <span>Copy Link</span>
+    </button>
+  </div>
+
+  <!-- ── Reconstitution Guide ──────────────────────── -->
+  <div class="guide-card">
+    <button class="guide-toggle" id="guide-btn" onclick="toggleGuide()">
+      <span>📋 Reconstitution Guide</span>
+      <span class="guide-chevron">▼</span>
+    </button>
+    <div class="guide-body" id="guide-body">
+
+      <div class="g-section">
+        <h4>🧤 Prepare Your Workspace</h4>
+        <ul>
+          <li>Wash hands thoroughly and put on sterile gloves and eye protection</li>
+          <li>Clean your work surface and lay out all necessary supplies</li>
+          <li>Gather: peptide vial, bacteriostatic water, sterile syringe, and alcohol swabs</li>
+        </ul>
+      </div>
+
+      <div class="g-section">
+        <h4>🌡️ Warm to Room Temperature</h4>
+        <ul>
+          <li>Remove peptide and bacteriostatic water from the refrigerator</li>
+          <li>Allow both vials to reach room temperature before proceeding</li>
+          <li>Cold solutions can interfere with proper dissolution</li>
+        </ul>
+      </div>
+
+      <div class="g-section">
+        <h4>🧪 Reconstitution Steps</h4>
+        <ul>
+          <li>Remove the center cap from the peptide vial</li>
+          <li>Wipe the rubber stopper with an alcohol swab — allow to fully dry</li>
+          <li>Repeat the same cleaning process for the bacteriostatic water vial</li>
+          <li>Draw the required amount of BAC water into a sterile syringe</li>
+          <li>Tilt the peptide vial at a <strong>45° angle</strong></li>
+          <li>Inject the BAC water <strong>slowly down the inside wall</strong> of the vial — do not squirt directly onto the powder</li>
+          <li><strong>Gently swirl</strong> to mix — do not shake vigorously</li>
+          <li>The solution should be clear with no visible particles before use</li>
+        </ul>
+      </div>
+
+      <div class="g-section">
+        <h4>🧊 Storage Guidelines</h4>
+        <ul>
+          <li>Store <strong>reconstituted</strong> peptide in the refrigerator at 2–8°C (36–46°F)</li>
+          <li>Use reconstituted solution within 3–4 weeks when refrigerated</li>
+          <li>For longer-term storage, freeze at −20°C — stable for 3–4 months</li>
+          <li>Avoid repeated freeze-thaw cycles, as this can degrade the peptide</li>
+          <li>Store <strong>lyophilized (unreconstituted)</strong> peptide at −20°C or below for long-term stability</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Disclaimer ─────────────────────────────────── -->
+  <div class="disclaimer">
+    <strong>⚠️ Research &amp; Educational Use Only</strong>
+    This calculator is for research and educational purposes only. It does not provide medical advice, dosing guidance, or treatment recommendations. Verify all calculations with a qualified professional before use.
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ─────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────
+const S = { syr: null, vial: null, bac: null, dose: null };
+
+// ─────────────────────────────────────────────────────
+//  SYRINGE PICKER
+// ─────────────────────────────────────────────────────
+function pickSyringe(units, el) {
+  S.syr = units;
+  document.querySelectorAll('.syr-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  check('n1');
+  tryCalc();
+}
+
+// ─────────────────────────────────────────────────────
+//  PRESET PILLS
+// ─────────────────────────────────────────────────────
+function pickPreset(field, val, el) {
+  S[field] = val;
+  const body = el.closest('.step-body');
+  body.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  body.querySelector('.custom-wrap').classList.remove('show');
+  check({ vial:'n2', bac:'n3', dose:'n4' }[field]);
+  tryCalc();
+}
+
+function showCustom(field, el) {
+  const body = el.closest('.step-body');
+  body.querySelectorAll('.pill').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+  body.querySelector('.custom-wrap').classList.add('show');
+  document.getElementById(field + '-ci').focus();
+  S[field] = null;
+}
+
+function typedCustom(field, raw) {
+  const n = parseFloat(raw);
+  S[field] = (isNaN(n) || n <= 0) ? null : n;
+  if (S[field]) check({ vial:'n2', bac:'n3', dose:'n4' }[field]);
+  tryCalc();
+}
+
+function check(id) {
+  document.getElementById(id).classList.add('done');
+}
+
+// ─────────────────────────────────────────────────────
+//  CALCULATE
+// ─────────────────────────────────────────────────────
+function tryCalc() {
+  const { syr, vial, bac, dose } = S;
+  if (!syr || !vial || !bac || !dose) return;
+
+  const doseMg   = dose / 1000;
+  const concMgMl = vial / bac;
+  const drawMl   = doseMg / concMgMl;
+  const drawU    = drawMl * 100;
+  const totalD   = vial / doseMg;
+  const fullD    = Math.floor(totalD);
+  const over     = drawU > syr;
+
+  // Hero text
+  document.getElementById('rh-dose').textContent =
+    dose >= 1000
+      ? `${n(dose/1000,2)} mg (${n(dose,0)} mcg)`
+      : `${n(dose,0)} mcg`;
+  document.getElementById('rh-units').textContent = n(drawU, 1);
+  document.getElementById('rh-ml').textContent    = `= ${n(drawMl, 3)} mL`;
+
+  // Stats
+  document.getElementById('r-conc').textContent  = `${n(concMgMl, 2)} mg/mL`;
+  document.getElementById('r-doses').textContent = `${n(totalD, 1)}`;
+  document.getElementById('r-full').textContent  = `${fullD}`;
+
+  // Warnings
+  show('w-syringe', over);
+  show('w-vol',     drawMl > 1 && !over);
+  show('w-dose',    doseMg > vial);
+
+  // Hero colour if overflow
+  document.getElementById('result-hero').style.background =
+    over ? 'linear-gradient(135deg,#991b1b,#dc2626)' :
+           'linear-gradient(135deg,#1e40af,#2563eb)';
+
+  // Draw syringe
+  drawSyringe(syr, drawU, over);
+
+  document.getElementById('result-card').classList.add('show');
+}
+
+function show(id, visible) {
+  document.getElementById(id).style.display = visible ? 'flex' : 'none';
+}
+
+function n(val, dec) {
+  return parseFloat(val.toFixed(dec)).toString();
+}
+
+// ─────────────────────────────────────────────────────
+//  SYRINGE SVG
+//  Needle LEFT  |  Liquid fills left→right  |  Plunger RIGHT
+//  Numbers read 0 → maxUnits left to right
+// ─────────────────────────────────────────────────────
+function drawSyringe(maxUnits, drawUnits, isOver) {
+  // Layout
+  const W = 520, H = 118;
+  const BX = 82,  BE = 438; // barrel X-start, X-end
+  const BW = BE - BX;       // barrel width = 356
+  const BY = 46,  BH = 46;  // barrel Y, height
+  const CY = BY + BH / 2;   // center Y = 69
+
+  const clampedU  = Math.min(drawUnits, maxUnits);
+  const fillW     = (clampedU / maxUnits) * BW;
+  const targetX   = BX + fillW;  // where plunger gasket sits
+
+  const liqColor  = isOver ? '#f87171' : '#60a5fa';
+  const liqTop    = isOver ? '#fca5a5' : '#bfdbfe';
+  const liqBot    = isOver ? '#f87171' : '#3b82f6';
+  const markColor = isOver ? '#dc2626' : '#1d4ed8';
+
+  // Tick marks
+  let ticks = '';
+  const intervals = maxUnits === 30 ? 5 : 10;
+  const labelEvery = maxUnits === 30 ? 5 : maxUnits === 50 ? 10 : 20;
+
+  for (let u = 0; u <= maxUnits; u += intervals) {
+    const tx   = BX + (u / maxUnits) * BW;
+    const isMaj = u % labelEvery === 0;
+    const th   = isMaj ? 11 : 6;
+    ticks += `<line x1="${tx.toFixed(1)}" y1="${BY-1}" x2="${tx.toFixed(1)}" y2="${(BY-1-th).toFixed(1)}"
+                    stroke="#94a3b8" stroke-width="${isMaj ? 1.5 : 1}" stroke-linecap="round"/>`;
+    if (isMaj && u > 0) {
+      ticks += `<text x="${tx.toFixed(1)}" y="${(BY-15).toFixed(1)}"
+                      text-anchor="middle" font-size="9.5" fill="#94a3b8"
+                      font-family="system-ui,-apple-system,sans-serif">${u}</text>`;
+    }
+  }
+
+  // Target arrow (pointing down, above barrel)
+  const arrowX = targetX.toFixed(1);
+  const arrowY = BY - 1;
+  const arrow = `
+    <line x1="${arrowX}" y1="${arrowY}" x2="${arrowX}" y2="${(arrowY - 13).toFixed(1)}"
+          stroke="${markColor}" stroke-width="2" stroke-linecap="round"/>
+    <polygon points="${arrowX},${arrowY} ${(targetX-5.5).toFixed(1)},${(arrowY-10).toFixed(1)} ${(targetX+5.5).toFixed(1)},${(arrowY-10).toFixed(1)}"
+             fill="${markColor}"/>
+    <text x="${arrowX}" y="${(arrowY - 22).toFixed(1)}"
+          text-anchor="middle" font-size="11.5" font-weight="800" fill="${markColor}"
+          font-family="system-ui,-apple-system,sans-serif"
+          >${n(clampedU, 1)}</text>`;
+
+  // Needle on left (points left)
+  const needleHub  = `<rect x="52" y="${CY-12}" width="30" height="24" rx="3" fill="#e2e8f0"/>`;
+  const needleTip  = `<polygon points="52,${CY-10} 52,${CY+10} 12,${CY}" fill="#cbd5e1"/>`;
+  const needleLine = `<line x1="12" y1="${CY}" x2="52" y2="${CY}" stroke="#94a3b8" stroke-width="1.5"/>`;
+
+  // Barrel
+  const barrel = `<rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="4"
+                        fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>`;
+
+  // Liquid fill (clipped inside barrel)
+  const clip   = `<clipPath id="bc"><rect x="${BX}" y="${BY}" width="${BW}" height="${BH}" rx="4"/></clipPath>`;
+  const liquid = fillW > 0
+    ? `<rect x="${BX}" y="${BY+1}" width="${(fillW).toFixed(1)}" height="${BH-2}"
+            fill="url(#lg)" clip-path="url(#bc)"/>`
+    : '';
+
+  // Plunger gasket (rubber stopper)
+  const gasket = `<rect x="${(targetX - 9).toFixed(1)}" y="${(BY - 3).toFixed(1)}"
+                        width="11" height="${BH + 6}"
+                        rx="3" fill="url(#pg)"/>`;
+
+  // Plunger rod + flange (grip on the RIGHT)
+  const rodX   = targetX + 2;
+  const gripX  = BE + 32;
+  const rod    = `<rect x="${rodX.toFixed(1)}" y="${(CY - 5).toFixed(1)}"
+                        width="${(gripX - rodX).toFixed(1)}" height="10"
+                        fill="#94a3b8" rx="3"/>`;
+  const grip   = `<rect x="${gripX}" y="${(BY - 14).toFixed(1)}"
+                        width="14" height="${BH + 28}"
+                        rx="3" fill="#64748b"/>`;
+  // Finger holes in grip
+  const holeY1 = CY - 16;
+  const holeY2 = CY + 6;
+  const holes  = `
+    <ellipse cx="${gripX + 7}" cy="${holeY1}" rx="5" ry="5" fill="#475569"/>
+    <ellipse cx="${gripX + 7}" cy="${holeY2}" rx="5" ry="5" fill="#475569"/>`;
+
+  // Assemble
+  const content = `
+    <defs>
+      ${clip}
+      <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="${liqTop}"/>
+        <stop offset="50%"  stop-color="${liqColor}"/>
+        <stop offset="100%" stop-color="${liqBot}"/>
+      </linearGradient>
+      <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#b0bec5"/>
+        <stop offset="100%" stop-color="#607d8b"/>
+      </linearGradient>
+    </defs>
+    ${needleHub}${needleTip}${needleLine}
+    ${barrel}
+    ${liquid}
+    ${ticks}
+    ${arrow}
+    ${gasket}
+    ${rod}${grip}${holes}
+  `;
+
+  document.getElementById('syr-main').innerHTML = content;
+}
+
+// ─────────────────────────────────────────────────────
+//  GUIDE TOGGLE
+// ─────────────────────────────────────────────────────
+function toggleGuide() {
+  document.getElementById('guide-btn').classList.toggle('open');
+  document.getElementById('guide-body').classList.toggle('open');
+}
+
+// ─────────────────────────────────────────────────────
+//  QR CODE + SHARE
+// ─────────────────────────────────────────────────────
+(function initQR() {
+  // When hosted at peptidehelpcenter.com this will auto-resolve.
+  // For local file preview, defaults to the production URL.
+  const url = 'https://www.peptidehelpcenter.com/reconcalculator';
+
+  document.getElementById('url-chip').textContent = url;
+
+  try {
+    new QRCode(document.getElementById('qr-box'), {
+      text:          url,
+      width:         160,
+      height:        160,
+      colorDark:     '#1d4ed8',
+      colorLight:    '#ffffff',
+      correctLevel:  QRCode.CorrectLevel.M
+    });
+  } catch(e) {
+    document.getElementById('qr-box').textContent = 'QR unavailable offline';
+  }
+
+  window._shareURL = url;
+})();
+
+function copyLink() {
+  navigator.clipboard.writeText(window._shareURL).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.classList.add('ok');
+    btn.querySelector('span').textContent = '✓ Copied!';
+    setTimeout(() => {
+      btn.classList.remove('ok');
+      btn.querySelector('span').textContent = 'Copy Link';
+    }, 2200);
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = window._shareURL;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+</script>
+</body>
+</html>
