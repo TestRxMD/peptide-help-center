@@ -49,7 +49,7 @@ export default function Navigation({ active, onNav }: Props) {
           display: 'flex', alignItems: 'center',
         }}>
           <img
-            src="/logo.png"
+            src="/logo.jpg"
             alt="Peptide Help Center"
             className="nav-logo"
             style={{ height: 36, width: 'auto', objectFit: 'contain', display: 'block' }}
