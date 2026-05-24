@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import type { Peptide } from '../types';
+import type { Peptide, NavSection } from '../types';
 import { categories, peptides, getPeptidesByCategory, searchPeptides } from '../data/peptides';
 import PeptideCard from '../components/PeptideCard';
 import PeptideModal from '../components/PeptideModal';
@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const MAX_COMPARE = 4;
 
-export default function WikiPage() {
+export default function WikiPage({ onNav }: { onNav?: (s: NavSection) => void }) {
   const { user } = useAuth();
   const [search, setSearch]           = useState('');
   const [selectedPeptide, setSelected]= useState<Peptide | null>(null);
@@ -223,7 +223,11 @@ export default function WikiPage() {
 
       {/* Modals */}
       {selectedPeptide && (
-        <PeptideModal peptide={selectedPeptide} onClose={() => setSelected(null)} />
+        <PeptideModal
+          peptide={selectedPeptide}
+          onClose={() => setSelected(null)}
+          onNavCommunity={onNav ? () => onNav('community') : undefined}
+        />
       )}
       {showCompare && compareList.length >= 2 && (
         <CompareModal

@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import type { Peptide, PeptideStatus } from '../types';
+import { useEffect, useState } from 'react';
+import type { Peptide, PeptideStatus, CommunityPost } from '../types';
 import { getCategoryById } from '../data/peptides';
-import { trackPeptideView } from '../lib/supabase';
+import { trackPeptideView, fetchRelatedPosts } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Props {
@@ -18,9 +18,10 @@ function statusClass(s: PeptideStatus) {
   return 'badge-research';
 }
 
-export default function PeptideModal({ peptide, onClose }: Props) {
+export default function PeptideModal({ peptide, onClose, onNavCommunity }: Props & { onNavCommunity?: () => void }) {
   const category = getCategoryById(peptide.categoryId);
   const { user } = useAuth();
+  const [relatedPosts, setRelatedPosts] = useState<CommunityPost[]>([]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -32,6 +33,11 @@ export default function PeptideModal({ peptide, onClose }: Props) {
   useEffect(() => {
     trackPeptideView(peptide.id, peptide.name, 'wiki', user?.id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peptide.id]);
+
+  // Load related community posts
+  useEffect(() => {
+    fetchRelatedPosts(peptide.id, 3).then(setRelatedPosts);
   }, [peptide.id]);
 
   return (
@@ -196,6 +202,48 @@ export default function PeptideModal({ peptide, onClose }: Props) {
               {' '}for HPLC-verified, batch-tested products.
             </div>
           </div>
+
+          {/* Related community discussions */}
+          {relatedPosts.length > 0 && (
+            <div className="detail-section">
+              <div className="detail-section-title">💬 Community Discussions</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {relatedPosts.map(post => (
+                  <div
+                    key={post.id}
+                    onClick={() => { onClose(); onNavCommunity?.(); }}
+                    style={{
+                      padding: '10px 12px', borderRadius: 8,
+                      background: 'var(--bg-input)', border: '1px solid var(--border)',
+                      cursor: onNavCommunity ? 'pointer' : 'default',
+                      transition: 'border-color 150ms',
+                    }}
+                    onMouseOver={e => { if (onNavCommunity) (e.currentTarget as HTMLElement).style.borderColor = 'rgba(31,64,204,0.3)'; }}
+                    onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; }}
+                  >
+                    <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--text-primary)', marginBottom: 3 }}>
+                      {post.title}
+                    </div>
+                    <div style={{ fontSize: 11.5, color: 'var(--text-muted)', display: 'flex', gap: 10 }}>
+                      <span>▲ {post.score}</span>
+                      <span>💬 {post.comment_count}</span>
+                      <span>by {post.author_display}</span>
+                    </div>
+                  </div>
+                ))}
+                {onNavCommunity && (
+                  <button
+                    onClick={() => { onClose(); onNavCommunity(); }}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      fontSize: 12.5, color: 'var(--accent)', fontFamily: 'inherit',
+                      textAlign: 'left', padding: '4px 0', fontWeight: 600,
+                    }}
+                  >View all {peptide.name} discussions →</button>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Disclaimer */}
           <div style={{

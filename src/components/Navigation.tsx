@@ -15,6 +15,7 @@ const BASE_ITEMS: { id: NavSection; label: string }[] = [
   { id: 'reminders', label: 'Reminders' },
   { id: 'guide',     label: 'Guide'     },
   { id: 'ai',        label: 'AI'        },
+  { id: 'community', label: '💬 Community' },
 ];
 
 export default function Navigation({ active, onNav }: Props) {

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import type { NavSection } from './types';
 
 // ── URL ↔ section helpers ─────────────────────────────────────────
-const SECTIONS: NavSection[] = ['recon', 'stacks', 'progress', 'reminders', 'guide', 'ai', 'dashboard'];
+const SECTIONS: NavSection[] = ['recon', 'stacks', 'progress', 'reminders', 'guide', 'ai', 'dashboard', 'community'];
 
 function pathToSection(path: string): NavSection {
   const seg = path.replace(/^\//, '').toLowerCase() as NavSection;
@@ -24,6 +24,7 @@ import RemindersPage from './pages/RemindersPage';
 import GuidePage from './pages/GuidePage';
 import AIPage from './pages/AIPage';
 import DashboardPage from './pages/DashboardPage';
+import CommunityPage from './pages/CommunityPage';
 
 function AppInner() {
   // Initialise from the current URL so direct links and refreshes work
@@ -49,14 +50,15 @@ function AppInner() {
   }, []);
 
   const page = {
-    wiki:      <WikiPage />,
+    wiki:      <WikiPage onNav={handleNav} />,
     recon:     <ReconPage />,
     stacks:    <StacksPage />,
     progress:  <ProgressPage />,
     reminders: <RemindersPage />,
     guide:     <GuidePage />,
     ai:        <AIPage />,
-    dashboard: <DashboardPage />,
+    dashboard:  <DashboardPage />,
+    community:  <CommunityPage />,
   }[section];
 
   return (

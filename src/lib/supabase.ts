@@ -271,3 +271,198 @@ export async function fetchTopPeptideViews(userId: string) {
     .slice(0, 6)
     .map(([name, count]) => ({ name, count }));
 }
+
+// ── Community ─────────────────────────────────────────────────────
+import type { CommunityPost, CommunityComment } from '../types';
+
+type RawPost = Record<string, unknown> & {
+  community_post_votes: { value: number }[];
+  community_comments:   { id: string }[];
+};
+
+type RawComment = Record<string, unknown> & {
+  community_comment_votes: { value: number }[];
+};
+
+function toPost(r: RawPost, _userId?: string, myVotes?: Record<string, 1 | -1>): CommunityPost {
+  const score = r.community_post_votes.reduce((s, v) => s + v.value, 0);
+  return {
+    id:             r.id as string,
+    user_id:        r.user_id as string,
+    author_display: r.author_display as string,
+    title:          r.title as string,
+    body:           r.body as string,
+    category:       r.category as string,
+    peptide_tags:   (r.peptide_tags as string[]) ?? [],
+    created_at:     r.created_at as string,
+    score,
+    comment_count:  r.community_comments.length,
+    my_vote:        myVotes ? (myVotes[r.id as string] ?? 0) : 0,
+  };
+}
+
+function toComment(r: RawComment, _userId?: string, myVotes?: Record<string, 1 | -1>): CommunityComment {
+  return {
+    id:             r.id as string,
+    post_id:        r.post_id as string,
+    user_id:        r.user_id as string,
+    author_display: r.author_display as string,
+    parent_id:      (r.parent_id as string | null) ?? null,
+    body:           r.body as string,
+    created_at:     r.created_at as string,
+    score:          r.community_comment_votes.reduce((s, v) => s + v.value, 0),
+    my_vote:        myVotes ? (myVotes[r.id as string] ?? 0) : 0,
+    replies:        [],
+  };
+}
+
+export async function fetchCommunityPosts(opts: {
+  category?: string;
+  peptideTag?: string;
+  sort?: 'hot' | 'new' | 'top';
+  limit?: number;
+  userId?: string;
+}): Promise<CommunityPost[]> {
+  if (!supabase) return [];
+
+  let q = supabase
+    .from('community_posts')
+    .select('*, community_post_votes(value), community_comments(id)')
+    .order('created_at', { ascending: false })
+    .limit(opts.limit ?? 40);
+
+  if (opts.category && opts.category !== 'all')
+    q = q.eq('category', opts.category);
+  if (opts.peptideTag)
+    q = q.contains('peptide_tags', [opts.peptideTag]);
+
+  const { data } = await q;
+  if (!data) return [];
+
+  // Fetch the user's own votes so we can highlight them
+  let myVotes: Record<string, 1 | -1> = {};
+  if (opts.userId && data.length > 0) {
+    const ids = data.map((p: Record<string, unknown>) => p.id as string);
+    const { data: votes } = await supabase
+      .from('community_post_votes')
+      .select('post_id, value')
+      .eq('user_id', opts.userId)
+      .in('post_id', ids);
+    (votes ?? []).forEach((v: { post_id: string; value: 1 | -1 }) => {
+      myVotes[v.post_id] = v.value;
+    });
+  }
+
+  const posts = (data as RawPost[]).map(r => toPost(r, opts.userId, myVotes));
+
+  // Client-side sort for hot/top since PostgREST can't sort on computed fields
+  if (opts.sort === 'top') posts.sort((a, b) => b.score - a.score);
+  if (opts.sort === 'hot' || !opts.sort) {
+    const now = Date.now();
+    posts.sort((a, b) => {
+      const hotA = a.score - (now - new Date(a.created_at).getTime()) / 3_600_000 * 0.1;
+      const hotB = b.score - (now - new Date(b.created_at).getTime()) / 3_600_000 * 0.1;
+      return hotB - hotA;
+    });
+  }
+  return posts;
+}
+
+export async function createCommunityPost(
+  userId: string,
+  authorDisplay: string,
+  data: { title: string; body: string; category: string; peptide_tags: string[] }
+): Promise<CommunityPost | null> {
+  if (!supabase) return null;
+  const { data: row, error } = await supabase
+    .from('community_posts')
+    .insert({ user_id: userId, author_display: authorDisplay, ...data })
+    .select('*, community_post_votes(value), community_comments(id)')
+    .single();
+  if (error || !row) return null;
+  return toPost(row as RawPost, userId, {});
+}
+
+export async function fetchCommunityComments(
+  postId: string,
+  userId?: string
+): Promise<CommunityComment[]> {
+  if (!supabase) return [];
+
+  const { data } = await supabase
+    .from('community_comments')
+    .select('*, community_comment_votes(value)')
+    .eq('post_id', postId)
+    .order('created_at', { ascending: true });
+  if (!data) return [];
+
+  let myVotes: Record<string, 1 | -1> = {};
+  if (userId && data.length > 0) {
+    const ids = data.map((c: Record<string, unknown>) => c.id as string);
+    const { data: votes } = await supabase
+      .from('community_comment_votes')
+      .select('comment_id, value')
+      .eq('user_id', userId)
+      .in('comment_id', ids);
+    (votes ?? []).forEach((v: { comment_id: string; value: 1 | -1 }) => {
+      myVotes[v.comment_id] = v.value;
+    });
+  }
+  return (data as RawComment[]).map(r => toComment(r, userId, myVotes));
+}
+
+export async function createCommunityComment(
+  userId: string,
+  authorDisplay: string,
+  data: { post_id: string; body: string; parent_id?: string | null }
+): Promise<CommunityComment | null> {
+  if (!supabase) return null;
+  const { data: row, error } = await supabase
+    .from('community_comments')
+    .insert({ user_id: userId, author_display: authorDisplay, ...data })
+    .select('*, community_comment_votes(value)')
+    .single();
+  if (error || !row) return null;
+  return toComment(row as RawComment, userId, {});
+}
+
+export async function voteOnPost(
+  userId: string, postId: string, value: 1 | -1, currentVote: 1 | -1 | 0
+): Promise<1 | -1 | 0> {
+  if (!supabase) return 0;
+  if (currentVote === value) {
+    // Toggle off — remove vote
+    await supabase.from('community_post_votes').delete()
+      .eq('post_id', postId).eq('user_id', userId);
+    return 0;
+  }
+  await supabase.from('community_post_votes')
+    .upsert({ post_id: postId, user_id: userId, value }, { onConflict: 'post_id,user_id' });
+  return value;
+}
+
+export async function voteOnComment(
+  userId: string, commentId: string, value: 1 | -1, currentVote: 1 | -1 | 0
+): Promise<1 | -1 | 0> {
+  if (!supabase) return 0;
+  if (currentVote === value) {
+    await supabase.from('community_comment_votes').delete()
+      .eq('comment_id', commentId).eq('user_id', userId);
+    return 0;
+  }
+  await supabase.from('community_comment_votes')
+    .upsert({ comment_id: commentId, user_id: userId, value }, { onConflict: 'comment_id,user_id' });
+  return value;
+}
+
+export async function fetchRelatedPosts(peptideTag: string, limit = 3): Promise<CommunityPost[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from('community_posts')
+    .select('*, community_post_votes(value), community_comments(id)')
+    .contains('peptide_tags', [peptideTag])
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (!data) return [];
+  return (data as RawPost[]).map(r => toPost(r));
+}

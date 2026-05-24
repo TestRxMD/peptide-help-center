@@ -30,7 +30,37 @@ export interface Category {
   color: string;
 }
 
-export type NavSection = 'wiki' | 'recon' | 'stacks' | 'progress' | 'reminders' | 'guide' | 'ai' | 'dashboard';
+export type NavSection = 'wiki' | 'recon' | 'stacks' | 'progress' | 'reminders' | 'guide' | 'ai' | 'dashboard' | 'community';
+
+export interface CommunityPost {
+  id: string;
+  user_id: string;
+  author_display: string;
+  title: string;
+  body: string;
+  category: string;
+  peptide_tags: string[];
+  created_at: string;
+  updated_at?: string;
+  // client-computed
+  score: number;
+  comment_count: number;
+  my_vote?: 1 | -1 | 0;
+}
+
+export interface CommunityComment {
+  id: string;
+  post_id: string;
+  user_id: string;
+  author_display: string;
+  parent_id: string | null;
+  body: string;
+  created_at: string;
+  // client-computed
+  score: number;
+  my_vote?: 1 | -1 | 0;
+  replies?: CommunityComment[];
+}
 
 export interface LabDraw {
   id: string;

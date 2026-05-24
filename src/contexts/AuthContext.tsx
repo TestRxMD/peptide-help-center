@@ -11,6 +11,7 @@ export interface UserProfile {
   experience?: string;
   notification_channel?: 'email' | 'sms' | null;
   notification_phone?: string | null;
+  display_name?: string | null;
 }
 
 interface AuthContextValue {
