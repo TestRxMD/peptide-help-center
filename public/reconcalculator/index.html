@@ -162,6 +162,29 @@
     .custom-wrap input:focus { border-color: var(--blue); }
     .custom-wrap .unit { font-size: .8125rem; color: var(--muted); font-weight: 500; }
 
+    /* ── Dropdown Select ─────────────────────────── */
+    .styled-select {
+      width: 100%;
+      padding: 11px 40px 11px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background: #fff;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 16px;
+      font-size: .9375rem;
+      font-weight: 600;
+      color: var(--text);
+      -webkit-appearance: none;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+      outline: none;
+    }
+    .styled-select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,.15); }
+    .styled-select.has-value { border-color: var(--blue); }
+
     /* ── Result Card ─────────────────────────────── */
     .result-card {
       background: var(--card);
@@ -418,14 +441,21 @@
       <div class="step-title">How much peptide is in your vial?</div>
     </div>
     <div class="step-body">
-      <div class="preset-row">
-        <button class="pill" onclick="pickPreset('vial', 5, this)">5 mg</button>
-        <button class="pill" onclick="pickPreset('vial', 10, this)">10 mg</button>
-        <button class="pill" onclick="pickPreset('vial', 15, this)">15 mg</button>
-        <button class="pill" onclick="showCustom('vial', this)">Other</button>
-      </div>
+      <select class="styled-select" id="vial-select" onchange="handleSelect('vial', this.value)">
+        <option value="" disabled selected>Select vial size…</option>
+        <option value="5">5 mg</option>
+        <option value="10">10 mg</option>
+        <option value="15">15 mg</option>
+        <option value="20">20 mg</option>
+        <option value="30">30 mg</option>
+        <option value="40">40 mg</option>
+        <option value="50">50 mg</option>
+        <option value="60">60 mg</option>
+        <option value="100">100 mg</option>
+        <option value="custom">Custom…</option>
+      </select>
       <div class="custom-wrap" id="vial-cw">
-        <input type="number" id="vial-ci" placeholder="e.g. 10" min="0.001" step="any"
+        <input type="number" id="vial-ci" placeholder="e.g. 20" min="0.001" step="any"
                oninput="typedCustom('vial', this.value)" />
         <span class="unit">mg</span>
       </div>
@@ -461,14 +491,18 @@
       <div class="step-title">How much peptide do you want per dose?</div>
     </div>
     <div class="step-body">
-      <div class="preset-row">
-        <button class="pill" onclick="pickPreset('dose', 50, this)">50 mcg</button>
-        <button class="pill" onclick="pickPreset('dose', 100, this)">100 mcg</button>
-        <button class="pill" onclick="pickPreset('dose', 250, this)">250 mcg</button>
-        <button class="pill" onclick="pickPreset('dose', 500, this)">500 mcg</button>
-        <button class="pill" onclick="pickPreset('dose', 1000, this)">1000 mcg</button>
-        <button class="pill" onclick="showCustom('dose', this)">Other</button>
-      </div>
+      <select class="styled-select" id="dose-select" onchange="handleSelect('dose', this.value)">
+        <option value="" disabled selected>Select dose…</option>
+        <option value="50">50 mcg</option>
+        <option value="100">100 mcg</option>
+        <option value="250">250 mcg</option>
+        <option value="500">500 mcg</option>
+        <option value="1000">1000 mcg (1 mg)</option>
+        <option value="2500">2500 mcg (2.5 mg)</option>
+        <option value="5000">5000 mcg (5 mg)</option>
+        <option value="10000">10000 mcg (10 mg)</option>
+        <option value="custom">Custom…</option>
+      </select>
       <div class="custom-wrap" id="dose-cw">
         <input type="number" id="dose-ci" placeholder="e.g. 500" min="0.001" step="any"
                oninput="typedCustom('dose', this.value)" />
@@ -648,6 +682,24 @@ function typedCustom(field, raw) {
   S[field] = (isNaN(n) || n <= 0) ? null : n;
   if (S[field]) check({ vial:'n2', bac:'n3', dose:'n4' }[field]);
   tryCalc();
+}
+
+function handleSelect(field, val) {
+  const numMap = { vial: 'n2', dose: 'n4' };
+  const cw = document.getElementById(field + '-cw');
+  const sel = document.getElementById(field + '-select');
+  if (val === 'custom') {
+    cw.classList.add('show');
+    sel.classList.remove('has-value');
+    document.getElementById(field + '-ci').focus();
+    S[field] = null;
+  } else {
+    cw.classList.remove('show');
+    S[field] = parseFloat(val);
+    sel.classList.add('has-value');
+    check(numMap[field]);
+    tryCalc();
+  }
 }
 
 function check(id) {
