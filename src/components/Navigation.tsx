@@ -29,8 +29,8 @@ export default function Navigation({ active, onNav }: Props) {
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 100,
-      background: 'rgba(7,9,15,0.85)',
-      backdropFilter: 'blur(24px) saturate(1.6)',
+      background: 'rgba(10,17,30,0.92)',
+      backdropFilter: 'blur(24px) saturate(1.8)',
       borderBottom: '1px solid var(--border)',
     }}>
       <div style={{

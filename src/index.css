@@ -4,22 +4,22 @@
 
 :root {
   /* Palette */
-  --bg-base:       #07090f;
-  --bg-surface:    #0d1117;
-  --bg-card:       #0d1117;
-  --bg-card-hover: #131920;
-  --bg-input:      #161c26;
-  --bg-subtle:     #111827;
+  --bg-base:       #0c1220;
+  --bg-surface:    #111b2e;
+  --bg-card:       #111b2e;
+  --bg-card-hover: #172035;
+  --bg-input:      #182038;
+  --bg-subtle:     #131d30;
 
   /* Borders */
-  --border:        rgba(255,255,255,0.07);
-  --border-light:  rgba(255,255,255,0.12);
-  --border-focus:  rgba(59,130,246,0.5);
+  --border:        rgba(255,255,255,0.11);
+  --border-light:  rgba(255,255,255,0.20);
+  --border-focus:  rgba(59,130,246,0.6);
 
   /* Text */
-  --text-primary:   #f0f4fc;
-  --text-secondary: #8b96a8;
-  --text-muted:     #4b5669;
+  --text-primary:   #ffffff;
+  --text-secondary: #c4d4e8;
+  --text-muted:     #7e96b0;
 
   /* Brand */
   --accent:        #3b82f6;
@@ -157,8 +157,8 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
   display: inline-flex; align-items: center;
   padding: 2px 7px; border-radius: 4px;
   font-size: 10.5px; font-weight: 500; letter-spacing: 0.01em;
-  background: rgba(255,255,255,0.04); color: var(--text-muted);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.08); color: var(--text-secondary);
+  border: 1px solid rgba(255,255,255,0.14);
 }
 
 /* ── CARD ───────────────────────────── */
@@ -249,7 +249,7 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmln
 }
 .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .detail-item {
-  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  background: rgba(255,255,255,0.05); border: 1px solid var(--border-light);
   border-radius: var(--radius); padding: 10px 12px;
 }
 .detail-item-label {
