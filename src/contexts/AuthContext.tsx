@@ -9,6 +9,8 @@ export interface UserProfile {
   weight_kg?: number;
   primary_goal?: string;
   experience?: string;
+  notification_channel?: 'email' | 'sms' | null;
+  notification_phone?: string | null;
 }
 
 interface AuthContextValue {

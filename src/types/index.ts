@@ -72,5 +72,6 @@ export interface Reminder {
   dose: string;
   route: AdminRoute;
   enabled: boolean;
+  notify: boolean;  // whether this reminder fires a notification
   note: string;
 }

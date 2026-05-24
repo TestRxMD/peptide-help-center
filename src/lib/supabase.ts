@@ -190,6 +190,66 @@ export async function deleteLabFile(id: string, filePath: string): Promise<void>
   await supabase.from('lab_files').delete().eq('id', id);
 }
 
+// ── Reminders ─────────────────────────────────────────────────────
+import type { AdminRoute, Reminder } from '../types';
+
+export async function fetchReminders(userId: string): Promise<Reminder[]> {
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from('reminders')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: true });
+  if (!data) return [];
+  return data.map((r: Record<string, unknown>) => ({
+    id:        r.id as string,
+    peptideId: r.peptide_id as string,
+    time:      r.time as string,
+    days:      r.days as string[],
+    dose:      r.dose as string,
+    route:     r.route as AdminRoute,
+    enabled:   r.enabled as boolean,
+    notify:    r.notify as boolean,
+    note:      (r.note as string) ?? '',
+  }));
+}
+
+export async function upsertReminder(
+  userId: string,
+  reminder: Omit<Reminder, 'id'> & { id?: string }
+): Promise<string | null> {
+  if (!supabase) return null;
+  const row = {
+    user_id:    userId,
+    peptide_id: reminder.peptideId,
+    time:       reminder.time,
+    days:       reminder.days,
+    dose:       reminder.dose,
+    route:      reminder.route,
+    note:       reminder.note ?? '',
+    notify:     reminder.notify,
+    enabled:    reminder.enabled,
+  };
+  // If id looks like a UUID (from Supabase), update in place
+  const isUuid = reminder.id && /^[0-9a-f-]{36}$/.test(reminder.id);
+  if (isUuid) {
+    const { data } = await supabase
+      .from('reminders').update(row)
+      .eq('id', reminder.id).eq('user_id', userId)
+      .select('id').single();
+    return (data as { id: string } | null)?.id ?? null;
+  }
+  const { data } = await supabase
+    .from('reminders').insert(row)
+    .select('id').single();
+  return (data as { id: string } | null)?.id ?? null;
+}
+
+export async function deleteReminderRow(userId: string, id: string): Promise<void> {
+  if (!supabase) return;
+  await supabase.from('reminders').delete().eq('id', id).eq('user_id', userId);
+}
+
 // ── Top peptide views ─────────────────────────────────────────────
 
 export async function fetchTopPeptideViews(userId: string) {
