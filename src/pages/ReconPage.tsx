@@ -125,10 +125,10 @@ export default function ReconPage() {
                 <div className="detail-item-label">Concentration</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
                   <span className="detail-item-value" style={{ fontSize: 17, color: 'var(--accent)', fontWeight: 700 }}>
-                    {concentration.toFixed(0)} mcg/mL
+                    {(concentration / 1000).toFixed(2)} mg/mL
                   </span>
                   <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
-                    = {(concentration / 1000).toFixed(2)} mg/mL
+                    = {concentration.toFixed(0)} mcg/mL
                   </span>
                 </div>
               </div>
