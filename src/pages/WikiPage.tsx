@@ -1,15 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import type { Peptide } from '../types';
 import { categories, peptides, getPeptidesByCategory, searchPeptides } from '../data/peptides';
 import PeptideCard from '../components/PeptideCard';
 import PeptideModal from '../components/PeptideModal';
 import CompareModal from '../components/CompareModal';
+import { trackSearch } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 const MAX_COMPARE = 4;
 
 export default function WikiPage() {
+  const { user } = useAuth();
   const [search, setSearch]           = useState('');
   const [selectedPeptide, setSelected]= useState<Peptide | null>(null);
+  const searchTrackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [compareIds, setCompareIds]   = useState<string[]>([]);
   const [showCompare, setShowCompare] = useState(false);
   const [collapsed, setCollapsed]     = useState<Set<string>>(new Set());
@@ -18,6 +22,17 @@ export default function WikiPage() {
   const searchResults = useMemo(() =>
     search.trim().length > 1 ? searchPeptides(search) : null,
   [search]);
+
+  // Debounced search tracking — fires 1.5s after user stops typing
+  useEffect(() => {
+    if (!searchResults) return;
+    if (searchTrackTimer.current) clearTimeout(searchTrackTimer.current);
+    searchTrackTimer.current = setTimeout(() => {
+      trackSearch(search, searchResults.length, user?.id);
+    }, 1500);
+    return () => { if (searchTrackTimer.current) clearTimeout(searchTrackTimer.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, searchResults?.length]);
 
   const toggleCollapse = (id: string) => {
     setCollapsed(prev => {

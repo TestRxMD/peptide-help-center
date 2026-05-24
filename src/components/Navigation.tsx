@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import type { NavSection } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Props {
   active: NavSection;
@@ -16,6 +18,10 @@ const items: { id: NavSection; label: string }[] = [
 ];
 
 export default function Navigation({ active, onNav }: Props) {
+  const { user, signOut, openAuth } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const initials = user?.email?.charAt(0).toUpperCase() ?? '';
+
   return (
     <nav style={{
       position: 'sticky', top: 0, zIndex: 100,
@@ -97,6 +103,78 @@ export default function Navigation({ active, onNav }: Props) {
           padding: '3px 8px', borderRadius: 4,
         }}>
           EDU ONLY
+        </div>
+
+        {/* Auth area */}
+        <div style={{ marginLeft: 12, flexShrink: 0, position: 'relative' }}>
+          {user ? (
+            <>
+              <button
+                onClick={() => setMenuOpen(v => !v)}
+                title={user.email}
+                style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #3b82f6, #7c3aed)',
+                  color: '#fff', fontWeight: 700, fontSize: 12,
+                  border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontFamily: 'inherit',
+                }}
+              >{initials}</button>
+
+              {menuOpen && (
+                <>
+                  {/* Backdrop */}
+                  <div
+                    style={{ position: 'fixed', inset: 0, zIndex: 199 }}
+                    onClick={() => setMenuOpen(false)}
+                  />
+                  {/* Dropdown */}
+                  <div style={{
+                    position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-light)',
+                    borderRadius: 10, padding: '6px',
+                    minWidth: 200, zIndex: 200,
+                    boxShadow: 'var(--shadow-lg)',
+                    animation: 'fadeIn 120ms ease',
+                  }}>
+                    <div style={{ padding: '8px 10px 10px', borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>Signed in as</div>
+                      <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user.email}</div>
+                    </div>
+                    <button
+                      onClick={() => { signOut(); setMenuOpen(false); }}
+                      style={{
+                        width: '100%', textAlign: 'left', padding: '8px 10px',
+                        background: 'none', border: 'none', borderRadius: 6,
+                        fontSize: 13, color: '#f87171', cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        transition: 'background var(--t-fast)',
+                      }}
+                      onMouseOver={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}
+                      onMouseOut={e => e.currentTarget.style.background = 'none'}
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                </>
+              )}
+            </>
+          ) : (
+            <button
+              onClick={openAuth}
+              style={{
+                padding: '5px 13px', borderRadius: 7,
+                background: 'var(--accent)', color: '#fff',
+                fontSize: 12, fontWeight: 600, border: 'none',
+                cursor: 'pointer', fontFamily: 'inherit',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+              }}
+            >
+              Sign in
+            </button>
+          )}
         </div>
       </div>
     </nav>

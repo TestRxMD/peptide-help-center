@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import type { Peptide, PeptideStatus } from '../types';
 import { getCategoryById } from '../data/peptides';
+import { trackPeptideView } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Props {
   peptide: Peptide;
@@ -18,12 +20,19 @@ function statusClass(s: PeptideStatus) {
 
 export default function PeptideModal({ peptide, onClose }: Props) {
   const category = getCategoryById(peptide.categoryId);
+  const { user } = useAuth();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
+
+  // Track view (fire-and-forget — works for logged-in and anonymous)
+  useEffect(() => {
+    trackPeptideView(peptide.id, peptide.name, 'wiki', user?.id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [peptide.id]);
 
   return (
     <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>

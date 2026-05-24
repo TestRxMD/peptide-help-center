@@ -1,5 +1,8 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { peptides, categories } from '../data/peptides';
+import { useAuth } from '../contexts/AuthContext';
+import AuthGate from '../components/AuthGate';
+import { saveAIMessage, saveProtocolRequest } from '../lib/supabase';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -213,7 +216,11 @@ Please provide:
 
 // ─── Component ──────────────────────────────────────────────────────────────
 
-export default function AIPage() {
+function AIContent() {
+  const { user } = useAuth();
+  // Stable session ID for this page visit — groups all messages into one conversation
+  const sessionId = useMemo(() => crypto.randomUUID(), []);
+
   const [tab, setTab]             = useState<Tab>('chat');
   const [messages, setMessages]   = useState<Message[]>([{
     role: 'assistant',
@@ -250,11 +257,15 @@ export default function AIPage() {
   const finalizeStream = useCallback(() => {
     setMessages(prev => {
       const last = prev[prev.length - 1];
+      if (last?.streaming && user) {
+        // Save the completed assistant message to Supabase
+        saveAIMessage(user.id, sessionId, 'assistant', last.content);
+      }
       if (last?.streaming) return [...prev.slice(0, -1), { ...last, streaming: false }];
       return prev;
     });
     setLoading(false);
-  }, []);
+  }, [user, sessionId]);
 
   const send = useCallback((overrideInput?: string) => {
     const userText = (overrideInput ?? input).trim();
@@ -266,6 +277,9 @@ export default function AIPage() {
     const updatedMsgs: Message[] = [...messages, { role: 'user', content: userText }];
     setMessages(updatedMsgs);
     setLoading(true);
+
+    // Track user message
+    if (user) saveAIMessage(user.id, sessionId, 'user', userText);
 
     const apiMessages = updatedMsgs
       .filter(m => !m.streaming)
@@ -304,11 +318,32 @@ export default function AIPage() {
     setLoading(true);
     setBuilderLoading(false);
 
+    // Track protocol request
+    if (user) saveAIMessage(user.id, sessionId, 'user', prompt);
+
     const apiMessages = updatedMsgs.map(m => ({ role: m.role, content: m.content }));
     streamChat(
       apiMessages,
       appendChunk,
-      finalizeStream,
+      () => {
+        // After protocol is generated, save it to protocol_requests table
+        setMessages(prev => {
+          const last = prev[prev.length - 1];
+          if (last?.streaming && user) {
+            saveProtocolRequest(user.id, {
+              goal:               form.goal,
+              experience:         form.experience,
+              budget:             form.budget,
+              concerns:           form.concerns,
+              contraindications:  form.contraindications,
+              protocolGenerated:  last.content,
+            });
+          }
+          if (last?.streaming) return [...prev.slice(0, -1), { ...last, streaming: false }];
+          return prev;
+        });
+        setLoading(false);
+      },
       (err) => {
         if (err.includes('ANTHROPIC_API_KEY') || err.includes('Network error')) {
           setUsingLocal(true);
@@ -323,7 +358,7 @@ export default function AIPage() {
         setLoading(false);
       }
     );
-  }, [form, builderLoading, messages, appendChunk, finalizeStream]);
+  }, [form, builderLoading, messages, appendChunk, user, sessionId]);
 
   const suggestions = [
     'Conservative fat loss + joint support protocol (with recon math)',
@@ -604,5 +639,14 @@ export default function AIPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+
+export default function AIPage() {
+  return (
+    <AuthGate feature="ai">
+      <AIContent />
+    </AuthGate>
   );
 }
