@@ -117,19 +117,34 @@ export default function ReconPage() {
             </div>
 
             <div className="recon-subgrid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {/* Concentration — special two-unit card */}
+              <div
+                className="detail-item"
+                style={{ borderColor: 'rgba(31,64,204,0.25)', background: 'rgba(31,64,204,0.06)' }}
+              >
+                <div className="detail-item-label">Concentration</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                  <span className="detail-item-value" style={{ fontSize: 17, color: 'var(--accent)', fontWeight: 700 }}>
+                    {concentration.toFixed(0)} mcg/mL
+                  </span>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+                    = {(concentration / 1000).toFixed(2)} mg/mL
+                  </span>
+                </div>
+              </div>
+
               {[
-                { label: 'Concentration', value: `${concentration.toFixed(0)} mcg/mL`, highlight: true },
-                { label: 'Draw Volume', value: `${drawMl.toFixed(3)} mL`, highlight: true },
-                { label: 'Insulin Syringe', value: `${drawUnits.toFixed(1)} units (U100)`, highlight: false },
-                { label: 'Doses per Vial', value: `${Math.floor((vialMg * 1000) / desiredMcg)} doses`, highlight: false },
+                { label: 'Draw Volume',    value: `${drawMl.toFixed(3)} mL`,                              highlight: true  },
+                { label: 'Insulin Syringe', value: `${drawUnits.toFixed(1)} units (U100)`,               highlight: false },
+                { label: 'Doses per Vial', value: `${Math.floor((vialMg * 1000) / desiredMcg)} doses`,   highlight: false },
               ].map(item => (
                 <div
                   key={item.label}
                   className="detail-item"
-                  style={item.highlight ? { borderColor: 'rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.06)' } : {}}
+                  style={item.highlight ? { borderColor: 'rgba(31,64,204,0.25)', background: 'rgba(31,64,204,0.06)' } : {}}
                 >
                   <div className="detail-item-label">{item.label}</div>
-                  <div className="detail-item-value" style={{ fontSize: item.highlight ? 17 : 13, color: item.highlight ? '#60a5fa' : undefined }}>
+                  <div className="detail-item-value" style={{ fontSize: item.highlight ? 17 : 13, color: item.highlight ? 'var(--accent)' : undefined, fontWeight: item.highlight ? 700 : 500 }}>
                     {item.value}
                   </div>
                 </div>
