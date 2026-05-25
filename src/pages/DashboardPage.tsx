@@ -17,6 +17,7 @@ import {
 } from '../lib/supabase';
 import type { LabFile } from '../lib/supabase';
 import { getPeptideById } from '../data/peptides';
+import BiomarkersTab from '../components/BiomarkersTab';
 
 // ── Lab marker presets ────────────────────────────────────────────
 
@@ -767,17 +768,31 @@ function ActivityTab({ userId }: { userId: string }) {
 
 // ── Main Dashboard ────────────────────────────────────────────────
 
-type DashTab = 'overview' | 'labs' | 'protocols' | 'activity';
+type DashTab = 'overview' | 'labs' | 'protocols' | 'activity' | 'biomarkers';
 
 function DashboardContent() {
   const { user } = useAuth();
   const [tab, setTab] = useState<DashTab>('overview');
 
+  // Biomarker draws — loaded lazily when the tab is first opened
+  const [bioDraws, setBioDraws] = useState<LabDraw[]>([]);
+  const [bioLoaded, setBioLoaded] = useState(false);
+
+  useEffect(() => {
+    if (tab === 'biomarkers' && !bioLoaded && user) {
+      fetchLabDraws(user.id).then(data => {
+        setBioDraws(data as LabDraw[]);
+        setBioLoaded(true);
+      });
+    }
+  }, [tab, bioLoaded, user]);
+
   const tabs: { id: DashTab; label: string; emoji: string }[] = [
-    { id: 'overview',  label: 'Overview',         emoji: '🏠' },
-    { id: 'labs',      label: 'Lab Draws',         emoji: '🧪' },
-    { id: 'protocols', label: 'Protocol History',  emoji: '🤖' },
-    { id: 'activity',  label: 'Activity Log',      emoji: '📅' },
+    { id: 'overview',    label: 'Overview',          emoji: '🏠' },
+    { id: 'labs',        label: 'Lab Draws',          emoji: '🧪' },
+    { id: 'biomarkers',  label: 'Biomarker Tracker',  emoji: '📊' },
+    { id: 'protocols',   label: 'Protocol History',   emoji: '🤖' },
+    { id: 'activity',    label: 'Activity Log',       emoji: '📅' },
   ];
 
   return (
@@ -823,10 +838,17 @@ function DashboardContent() {
       </div>
 
       {/* Tab content */}
-      {tab === 'overview'  && <OverviewTab  userId={user!.id} />}
-      {tab === 'labs'      && <LabDrawsTab  userId={user!.id} />}
-      {tab === 'protocols' && <ProtocolsTab userId={user!.id} />}
-      {tab === 'activity'  && <ActivityTab  userId={user!.id} />}
+      {tab === 'overview'   && <OverviewTab  userId={user!.id} />}
+      {tab === 'labs'       && <LabDrawsTab  userId={user!.id} />}
+      {tab === 'biomarkers' && (
+        <BiomarkersTab
+          draws={bioDraws}
+          userId={user!.id}
+          onDrawAdded={draw => setBioDraws(prev => [draw, ...prev])}
+        />
+      )}
+      {tab === 'protocols'  && <ProtocolsTab userId={user!.id} />}
+      {tab === 'activity'   && <ActivityTab  userId={user!.id} />}
     </div>
   );
 }
