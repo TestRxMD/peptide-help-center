@@ -8,14 +8,15 @@ interface Props {
 }
 
 const BASE_ITEMS: { id: NavSection; label: string }[] = [
-  { id: 'wiki',      label: 'Wiki'      },
-  { id: 'recon',     label: 'Recon'     },
-  { id: 'stacks',    label: 'Stacks'    },
-  { id: 'progress',  label: 'Progress'  },
-  { id: 'reminders', label: 'Reminders' },
-  { id: 'guide',     label: 'Guide'     },
-  { id: 'ai',        label: 'AI'        },
-  { id: 'community', label: '💬 Community' },
+  { id: 'wiki',                label: 'Wiki'           },
+  { id: 'recon',               label: 'Recon'          },
+  { id: 'stacks',              label: 'Stacks'         },
+  { id: 'progress',            label: 'Progress'       },
+  { id: 'reminders',           label: 'Reminders'      },
+  { id: 'guide',               label: 'Guide'          },
+  { id: 'ai',                  label: 'AI'             },
+  { id: 'interaction-checker', label: '⚗️ Interactions' },
+  { id: 'community',           label: '💬 Community'   },
 ];
 
 export default function Navigation({ active, onNav }: Props) {
