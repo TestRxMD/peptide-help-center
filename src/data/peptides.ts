@@ -396,7 +396,7 @@ export const peptides: Peptide[] = [
     description:
       'BPC-157 (Body Protection Compound-157) is a 15-amino acid sequence derived from human gastric juice. It is one of the most studied and versatile healing peptides, demonstrating accelerated healing in tendons, ligaments, muscles, gut lining, and nervous tissue. Works via upregulation of growth factor receptors and angiogenesis.',
     halfLife: '~4–6 hours',
-    dosageRange: '250–500 mcg/day (systemic) or 250 mcg locally injected',
+    dosageRange: '250 mcg – 1000 mcg (1 mg)/day (systemic) or 250 mcg locally injected',
     frequency: 'Daily or twice daily',
     routes: ['SubQ', 'IM', 'Oral', 'Intranasal'],
     benefits: ['Tendon/ligament healing', 'Gut healing (IBD/SIBO)', 'Muscle repair', 'Neuroprotection', 'Angiogenesis', 'Anti-inflammatory'],
