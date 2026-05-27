@@ -4,7 +4,7 @@ import { peptides } from '../data/peptides';
 export default function ReconPage() {
   const [peptideId, setPeptideId]   = useState('bpc-157');
   const [weight, setWeight]         = useState(80);
-  const [unit, setUnit]             = useState<'kg' | 'lbs'>('kg');
+  const [unit, setUnit]             = useState<'kg' | 'lbs'>('lbs');
   const [vialMg, setVialMg]         = useState(5);
   const [waterMl, setWaterMl]       = useState(2);
   const [desiredMg, setDesiredMg] = useState(0.25);
