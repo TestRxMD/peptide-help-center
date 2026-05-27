@@ -7,11 +7,12 @@ export default function ReconPage() {
   const [unit, setUnit]             = useState<'kg' | 'lbs'>('kg');
   const [vialMg, setVialMg]         = useState(5);
   const [waterMl, setWaterMl]       = useState(2);
-  const [desiredMcg, setDesiredMcg] = useState(250);
+  const [desiredMg, setDesiredMg] = useState(0.25);
 
   const peptide = useMemo(() => peptides.find(p => p.id === peptideId), [peptideId]);
 
   const weightKg = unit === 'lbs' ? weight * 0.453592 : weight;
+  const desiredMcg = desiredMg * 1000; // derived — all downstream calculations unchanged
   const concentration = (vialMg * 1000) / waterMl; // mcg/mL
   const drawMl  = desiredMcg / concentration;
   const drawUnits = drawMl * 100; // insulin units (U100 syringe)
@@ -103,8 +104,17 @@ export default function ReconPage() {
               Desired Dose
             </div>
             <div>
-              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Dose (mcg)</label>
-              <input type="number" value={desiredMcg} onChange={e => setDesiredMcg(Number(e.target.value))} min={1} step={50} />
+              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>Dose (mg)</label>
+              <input
+                type="number"
+                value={desiredMg}
+                onChange={e => setDesiredMg(Number(e.target.value))}
+                min={0.001}
+                step={0.05}
+              />
+              <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginTop: 6 }}>
+                = {Math.round(desiredMcg).toLocaleString()} mcg
+              </div>
             </div>
           </div>
         </div>
