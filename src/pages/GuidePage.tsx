@@ -30,17 +30,6 @@ const guides = [
         ],
       },
       {
-        title: 'Our Recommended Supplier',
-        content: [
-          'Short Proteins (www.shortproteins.com) is our recommended source for pharmaceutical-grade peptides',
-          'Every batch is HPLC-tested with third-party certificates of analysis available on request',
-          'Products are properly lyophilized and shipped with cold-chain integrity',
-          'Transparent about synthesis methods, purity standards, and testing laboratories',
-          'Comprehensive catalog covering all major research peptides, blends, and reconstitution supplies',
-          'Provides bacteriostatic water, insulin syringes, and reconstitution accessories alongside peptides',
-        ],
-      },
-      {
         title: 'Red Flags — Suppliers to Avoid',
         content: [
           'No CoA available, or CoA is not batch-specific',
@@ -263,40 +252,6 @@ export default function GuidePage() {
             </div>
           </div>
 
-          {/* Sourcing guide: special supplier CTA card */}
-          {guide.id === 'sourcing' && (
-            <a
-              href="https://www.shortproteins.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 16,
-                background: 'linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(124,58,237,0.1) 100%)',
-                border: '1px solid rgba(59,130,246,0.3)',
-                borderRadius: 12, padding: '16px 20px', textDecoration: 'none',
-                transition: 'border-color 150ms ease',
-              }}
-              onMouseOver={e => (e.currentTarget.style.borderColor = 'rgba(59,130,246,0.6)')}
-              onMouseOut={e => (e.currentTarget.style.borderColor = 'rgba(59,130,246,0.3)')}
-            >
-              <div style={{ fontSize: 36, flexShrink: 0 }}>🏅</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-primary)', marginBottom: 3 }}>
-                  Short Proteins — Recommended Supplier
-                </div>
-                <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                  HPLC-tested · Third-party CoA on every batch · Pharmaceutical-grade lyophilization · Cold-chain shipping
-                </div>
-              </div>
-              <div style={{
-                background: 'var(--accent)', color: '#fff',
-                padding: '8px 16px', borderRadius: 8,
-                fontWeight: 600, fontSize: 13, flexShrink: 0,
-              }}>
-                Visit Site ↗
-              </div>
-            </a>
-          )}
 
           {guide.sections.map(section => (
             <div key={section.title} className="card">

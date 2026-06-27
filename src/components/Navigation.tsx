@@ -103,6 +103,23 @@ export default function Navigation({ active, onNav }: Props) {
               </button>
             );
           })}
+          <a
+            href="/library"
+            title="The Peptide Atlas — full compound library"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0 16px', height: '100%',
+              background: 'transparent', color: 'var(--text-muted)',
+              fontWeight: 400, fontSize: 13, letterSpacing: '-0.01em',
+              whiteSpace: 'nowrap', flexShrink: 0, textDecoration: 'none',
+              borderBottom: '1.5px solid transparent',
+              transition: 'color var(--t)', fontFamily: "'Inter', sans-serif",
+            }}
+            onMouseOver={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            onMouseOut={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >
+            Library
+          </a>
         </div>
 
         {/* EDU badge */}

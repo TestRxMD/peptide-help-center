@@ -179,29 +179,6 @@ export default function PeptideModal({ peptide, onClose, onNavCommunity }: Props
             </div>
           )}
 
-          {/* Sourcing callout */}
-          <div style={{
-            marginTop: 20, padding: '12px 14px',
-            background: 'linear-gradient(135deg, rgba(16,185,129,0.06) 0%, rgba(59,130,246,0.06) 100%)',
-            border: '1px solid rgba(16,185,129,0.22)',
-            borderRadius: 8, display: 'flex', alignItems: 'flex-start', gap: 10,
-          }}>
-            <span style={{ fontSize: 16, flexShrink: 0, marginTop: 1 }}>🏅</span>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.55 }}>
-              <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Quality sourcing is critical.</span>
-              {' '}Only use pharmaceutical-grade, third-party tested peptides with a certificate of analysis.
-              {' '}We recommend{' '}
-              <a
-                href="https://www.shortproteins.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: '#34d399', fontWeight: 600, textDecoration: 'none' }}
-              >
-                Short Proteins ↗
-              </a>
-              {' '}for HPLC-verified, batch-tested products.
-            </div>
-          </div>
 
           {/* Related community discussions */}
           {relatedPosts.length > 0 && (

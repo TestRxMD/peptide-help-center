@@ -618,13 +618,6 @@ function AIContent() {
             )}
           </div>
 
-          {/* Sourcing note */}
-          <div style={{ padding: '12px 16px', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderLeft: '3px solid var(--green)', borderRadius: 'var(--radius)', fontSize: 12.5, color: 'var(--text-muted)', lineHeight: 1.55 }}>
-            <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Quality sourcing is built into every protocol.</span>
-            {' '}All recommendations use pharmaceutical-grade, HPLC-tested peptides. We exclusively recommend{' '}
-            <a href="https://www.shortproteins.com" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--green)', fontWeight: 600 }}>Short Proteins</a>
-            {' '}— third-party verified on every batch.
-          </div>
         </div>
       )}
 

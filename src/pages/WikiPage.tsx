@@ -65,36 +65,6 @@ export default function WikiPage({ onNav }: { onNav?: (s: NavSection) => void })
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '20px 16px' }}>
 
-      {/* Sourcing callout — clean, text-forward */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 16,
-        background: 'var(--bg-surface)',
-        border: '1px solid var(--border)',
-        borderLeft: '3px solid var(--green)',
-        borderRadius: 'var(--radius)',
-        padding: '12px 16px', marginBottom: 20,
-        flexWrap: 'wrap',
-      }}>
-        <div style={{ flex: 1, minWidth: 200, fontSize: 12.5, color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Sourcing matters.</span>
-          {' '}Always verify purity with a certificate of analysis. Recommended supplier:{' '}
-          <a href="https://www.shortproteins.com" target="_blank" rel="noopener noreferrer"
-            style={{ color: 'var(--green)', fontWeight: 600 }}>
-            Short Proteins
-          </a>
-          {' '}— HPLC-tested, third-party verified on every batch.
-        </div>
-        <a href="https://www.shortproteins.com" target="_blank" rel="noopener noreferrer"
-          style={{
-            fontSize: 12, fontWeight: 600, color: 'var(--green)',
-            border: '1px solid rgba(34,197,94,0.25)', borderRadius: 6,
-            padding: '5px 12px', textDecoration: 'none', flexShrink: 0,
-            background: 'rgba(34,197,94,0.07)',
-            transition: 'background var(--t)',
-          }}>
-          Shop Short Proteins ↗
-        </a>
-      </div>
 
       {/* Top bar: search + filters */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>

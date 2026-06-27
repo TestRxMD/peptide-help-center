@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/reconcalculator", "destination": "/reconcalculator/index.html" },
+    { "source": "/library", "destination": "/library/index.html" },
+    { "source": "/library/", "destination": "/library/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
