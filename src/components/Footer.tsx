@@ -1,10 +1,4 @@
-import type { NavSection } from '../types';
-
-interface Props {
-  onNav: (s: NavSection) => void;
-}
-
-export default function Footer({ onNav }: Props) {
+export default function Footer() {
   return (
     <footer style={{
       borderTop: '1px solid var(--border)',

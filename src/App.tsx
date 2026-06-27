@@ -49,7 +49,7 @@ function AppInner() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
 
-  const page = {
+  const pages = {
     recon:     <ReconPage />,
     stacks:    <StacksPage />,
     progress:  <ProgressPage />,
@@ -59,13 +59,14 @@ function AppInner() {
     dashboard:           <DashboardPage />,
     community:           <CommunityPage />,
     'interaction-checker': <InteractionCheckerPage />,
-  }[section];
+  };
+  const page = pages[section as keyof typeof pages] ?? <GuidePage />;
 
   return (
     <div style={{ minHeight: '100svh', display: 'flex', flexDirection: 'column' }}>
       <Navigation active={section} onNav={handleNav} />
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>{page}</main>
-      <Footer onNav={handleNav} />
+      <Footer />
       {showAuthModal && <AuthModal />}
     </div>
   );
