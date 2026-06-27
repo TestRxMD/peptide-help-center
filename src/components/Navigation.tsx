@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import type { NavSection } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -74,8 +74,8 @@ export default function Navigation({ active, onNav }: Props) {
             const isActive = active === item.id;
             const isDash = item.id === 'dashboard';
             return (
+              <Fragment key={item.id}>
               <button
-                key={item.id}
                 onClick={() => onNav(item.id)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -100,25 +100,28 @@ export default function Navigation({ active, onNav }: Props) {
               >
                 {item.label}
               </button>
+              {item.id === 'wiki' && (
+                <a
+                  href="/library"
+                  title="The Peptide Atlas — full compound library"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '0 16px', height: '100%',
+                    background: 'transparent', color: 'var(--text-muted)',
+                    fontWeight: 400, fontSize: 13, letterSpacing: '-0.01em',
+                    whiteSpace: 'nowrap', flexShrink: 0, textDecoration: 'none',
+                    borderBottom: '1.5px solid transparent',
+                    transition: 'color var(--t)', fontFamily: "'Inter', sans-serif",
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+                  onMouseOut={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+                >
+                  Library
+                </a>
+              )}
+              </Fragment>
             );
           })}
-          <a
-            href="/library"
-            title="The Peptide Atlas — full compound library"
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              padding: '0 16px', height: '100%',
-              background: 'transparent', color: 'var(--text-muted)',
-              fontWeight: 400, fontSize: 13, letterSpacing: '-0.01em',
-              whiteSpace: 'nowrap', flexShrink: 0, textDecoration: 'none',
-              borderBottom: '1.5px solid transparent',
-              transition: 'color var(--t)', fontFamily: "'Inter', sans-serif",
-            }}
-            onMouseOver={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
-            onMouseOut={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
-          >
-            Library
-          </a>
         </div>
 
         {/* EDU badge */}
