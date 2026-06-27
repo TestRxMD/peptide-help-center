@@ -350,7 +350,7 @@ function AIContent() {
           const goalLabel = GOALS.find(g => g.value === form.goal)?.label ?? form.goal;
           setMessages(prev => [...prev, {
             role: 'assistant',
-            content: `**Protocol Builder — ${goalLabel}**\n\nThe AI API isn't connected yet. Once you add your Anthropic API key to Vercel, this will generate a fully personalized protocol.\n\nIn the meantime, check the **Wiki** tab for peptides matching your goal, or ask the chatbot a specific question about a peptide.`,
+            content: `**Protocol Builder — ${goalLabel}**\n\nThe AI API isn't connected yet. Once you add your Anthropic API key to Vercel, this will generate a fully personalized protocol.\n\nIn the meantime, browse the **Library** for peptides matching your goal, or ask the chatbot a specific question about a peptide.`,
           }]);
         } else {
           setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ **Error:** ${err}` }]);

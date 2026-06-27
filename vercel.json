@@ -1,4 +1,7 @@
 {
+  "redirects": [
+    { "source": "/", "destination": "/library", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/reconcalculator", "destination": "/reconcalculator/index.html" },
     { "source": "/library", "destination": "/library/index.html" },

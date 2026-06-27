@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react';
+import { useState } from 'react';
 import type { NavSection } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -8,7 +8,6 @@ interface Props {
 }
 
 const BASE_ITEMS: { id: NavSection; label: string }[] = [
-  { id: 'wiki',                label: 'Wiki'           },
   { id: 'recon',               label: 'Recon'          },
   { id: 'stacks',              label: 'Stacks'         },
   { id: 'progress',            label: 'Progress'       },
@@ -50,8 +49,8 @@ export default function Navigation({ active, onNav }: Props) {
           display: 'flex', alignItems: 'center',
         }}>
           <button
-            onClick={() => onNav('wiki')}
-            title="Go to homepage"
+            onClick={() => { window.location.href = '/library'; }}
+            title="Go to homepage (Library)"
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
               padding: 0, lineHeight: 0, display: 'flex', alignItems: 'center',
@@ -70,12 +69,29 @@ export default function Navigation({ active, onNav }: Props) {
           display: 'flex', flex: 1,
           overflowX: 'auto', height: '100%',
         }}>
+          <a
+            href="/library"
+            title="The Peptide Atlas — full compound library"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0 16px', height: '100%',
+              background: 'transparent', color: 'var(--text-muted)',
+              fontWeight: 400, fontSize: 13, letterSpacing: '-0.01em',
+              whiteSpace: 'nowrap', flexShrink: 0, textDecoration: 'none',
+              borderBottom: '1.5px solid transparent',
+              transition: 'color var(--t)', fontFamily: "'Inter', sans-serif",
+            }}
+            onMouseOver={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            onMouseOut={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >
+            Library
+          </a>
           {items.map(item => {
             const isActive = active === item.id;
             const isDash = item.id === 'dashboard';
             return (
-              <Fragment key={item.id}>
               <button
+                key={item.id}
                 onClick={() => onNav(item.id)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -100,26 +116,6 @@ export default function Navigation({ active, onNav }: Props) {
               >
                 {item.label}
               </button>
-              {item.id === 'wiki' && (
-                <a
-                  href="/library"
-                  title="The Peptide Atlas — full compound library"
-                  style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: '0 16px', height: '100%',
-                    background: 'transparent', color: 'var(--text-muted)',
-                    fontWeight: 400, fontSize: 13, letterSpacing: '-0.01em',
-                    whiteSpace: 'nowrap', flexShrink: 0, textDecoration: 'none',
-                    borderBottom: '1.5px solid transparent',
-                    transition: 'color var(--t)', fontFamily: "'Inter', sans-serif",
-                  }}
-                  onMouseOver={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
-                  onMouseOut={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
-                >
-                  Library
-                </a>
-              )}
-              </Fragment>
             );
           })}
         </div>

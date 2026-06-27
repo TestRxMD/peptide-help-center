@@ -19,8 +19,8 @@ export default function Footer({ onNav }: Props) {
           justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
         }}>
           <button
-            onClick={() => onNav('wiki')}
-            title="Go to homepage"
+            onClick={() => { window.location.href = '/library'; }}
+            title="Go to homepage (Library)"
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
               padding: 0, lineHeight: 0, display: 'flex', alignItems: 'center',
