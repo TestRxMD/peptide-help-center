@@ -15,7 +15,6 @@ const BASE_ITEMS: { id: NavSection; label: string }[] = [
   { id: 'reminders',           label: 'Reminders'      },
   { id: 'guide',               label: 'Guide'          },
   { id: 'ai',                  label: 'AI'             },
-  { id: 'interaction-checker', label: '⚗️ Interactions' },
   { id: 'community',           label: '💬 Community'   },
 ];
 
