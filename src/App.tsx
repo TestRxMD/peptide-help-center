@@ -6,16 +6,17 @@ const SECTIONS: NavSection[] = ['recon', 'stacks', 'progress', 'reminders', 'gui
 
 function pathToSection(path: string): NavSection {
   const seg = path.replace(/^\//, '').toLowerCase() as NavSection;
-  return SECTIONS.includes(seg) ? seg : 'guide';
+  return SECTIONS.includes(seg) ? seg : 'home';
 }
 
 function sectionToPath(section: NavSection): string {
-  return section === 'wiki' ? '/' : `/${section}`;
+  return (section === 'home' || section === 'wiki') ? '/' : `/${section}`;
 }
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Navigation from './components/Navigation';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
+import HomePage from './pages/HomePage';
 import ReconPage from './pages/ReconPage';
 import StacksPage from './pages/StacksPage';
 import ProgressPage from './pages/ProgressPage';
@@ -50,6 +51,7 @@ function AppInner() {
   }, []);
 
   const pages = {
+    home:      <HomePage onNav={handleNav} />,
     recon:     <ReconPage />,
     stacks:    <StacksPage />,
     progress:  <ProgressPage />,

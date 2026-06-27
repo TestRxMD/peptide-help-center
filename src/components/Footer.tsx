@@ -13,8 +13,8 @@ export default function Footer() {
           justifyContent: 'space-between', flexWrap: 'wrap', gap: 12,
         }}>
           <button
-            onClick={() => { window.location.href = '/library'; }}
-            title="Go to homepage (Library)"
+            onClick={() => { window.location.href = '/'; }}
+            title="Go to homepage"
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
               padding: 0, lineHeight: 0, display: 'flex', alignItems: 'center',

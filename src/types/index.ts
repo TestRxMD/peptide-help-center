@@ -30,7 +30,7 @@ export interface Category {
   color: string;
 }
 
-export type NavSection = 'wiki' | 'recon' | 'stacks' | 'progress' | 'reminders' | 'guide' | 'ai' | 'dashboard' | 'community' | 'interaction-checker';
+export type NavSection = 'home' | 'wiki' | 'recon' | 'stacks' | 'progress' | 'reminders' | 'guide' | 'ai' | 'dashboard' | 'community' | 'interaction-checker';
 
 export interface CommunityPost {
   id: string;

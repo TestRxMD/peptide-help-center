@@ -49,8 +49,8 @@ export default function Navigation({ active, onNav }: Props) {
           display: 'flex', alignItems: 'center',
         }}>
           <button
-            onClick={() => { window.location.href = '/library'; }}
-            title="Go to homepage (Library)"
+            onClick={() => onNav('home')}
+            title="Go to homepage"
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
               padding: 0, lineHeight: 0, display: 'flex', alignItems: 'center',
@@ -69,6 +69,22 @@ export default function Navigation({ active, onNav }: Props) {
           display: 'flex', flex: 1,
           overflowX: 'auto', height: '100%',
         }}>
+          <button
+            onClick={() => onNav('home')}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '0 16px', height: '100%', background: 'transparent',
+              color: active === 'home' ? 'var(--text-primary)' : 'var(--text-muted)',
+              fontWeight: active === 'home' ? 600 : 400,
+              fontSize: 13, letterSpacing: '-0.01em', whiteSpace: 'nowrap', flexShrink: 0,
+              borderBottom: active === 'home' ? '1.5px solid var(--accent)' : '1.5px solid transparent',
+              transition: 'color var(--t)', fontFamily: "'Inter', sans-serif",
+            }}
+            onMouseOver={e => { if (active !== 'home') e.currentTarget.style.color = 'var(--text-secondary)'; }}
+            onMouseOut={e => { if (active !== 'home') e.currentTarget.style.color = 'var(--text-muted)'; }}
+          >
+            Home
+          </button>
           <a
             href="/library"
             title="The Peptide Atlas — full compound library"
