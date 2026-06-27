@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { KB } from './_kb';
 import type { KBEntry } from './_kb';
+import { checkStack } from './_interactions';
 
 export const config = { runtime: 'edge' };
 
@@ -207,37 +208,122 @@ export default async function handler(req: Request): Promise<Response> {
   // Cheap model for general chat; top-tier model for full protocol generation.
   const mode = body.mode === 'protocol' ? 'protocol' : 'chat';
   const lastUser = [...messages].reverse().find(m => m.role === 'user')?.content ?? '';
-  const system = SYSTEM_PROMPT + libraryGrounding(lastUser);
+  const system = SYSTEM_PROMPT + libraryGrounding(lastUser) +
+    '\n\n# TOOLS AVAILABLE\n' +
+    '- reconstitution_calculator: ALWAYS call this for any reconstitution/dosing math (vial mg, BAC water mL, desired dose mcg). Never do the arithmetic yourself — call the tool and report its exact numbers.\n' +
+    '- check_peptide_interactions: call this for any stacking or peptide+medication interaction question; pass the substance names and use the returned severity/mechanism/recommendation.\n' +
+    '- web_search: only for current facts not covered by the library.';
   const model = mode === 'protocol'
     ? (process.env.PROTOCOL_MODEL || 'claude-opus-4-8')        // top-tier for full protocols
     : (process.env.CHAT_MODEL || 'claude-haiku-4-5-20251001'); // fast/cheap for general chat
   const maxTokens = mode === 'protocol' ? 4096 : 1536;
-  const tools = process.env.DISABLE_WEB_SEARCH
-    ? []
-    : [{ type: 'web_search_20250305', name: 'web_search', max_uses: 4 }];
+  const tools: any[] = [
+    {
+      name: 'reconstitution_calculator',
+      description: 'Compute exact peptide reconstitution & dosing numbers. ALWAYS use for any dosing/units/concentration/doses-per-vial math — never compute it yourself.',
+      input_schema: {
+        type: 'object',
+        properties: {
+          vial_mg: { type: 'number', description: 'Total peptide in the vial (milligrams).' },
+          bac_water_ml: { type: 'number', description: 'Bacteriostatic water added (milliliters).' },
+          desired_dose_mcg: { type: 'number', description: 'Desired dose per injection (micrograms).' },
+        },
+        required: ['vial_mg', 'bac_water_ml', 'desired_dose_mcg'],
+      },
+    },
+    {
+      name: 'check_peptide_interactions',
+      description: 'Look up curated peptide/medication interactions & severity from The Peptide Help Center database. Use for any stacking or drug-interaction question.',
+      input_schema: {
+        type: 'object',
+        properties: {
+          substances: {
+            type: 'array', items: { type: 'string' },
+            description: 'Two or more peptide and/or medication names to check together.',
+          },
+        },
+        required: ['substances'],
+      },
+    },
+  ];
+  if (!process.env.DISABLE_WEB_SEARCH) {
+    tools.push({ type: 'web_search_20250305', name: 'web_search', max_uses: 4 });
+  }
 
   const client = new Anthropic({ apiKey });
 
   const encoder = new TextEncoder();
+  const convo: any[] = messages.map(m => ({ role: m.role, content: m.content }));
+
+  const calcRecon = (vialMg: number, bacWaterMl: number, desiredDoseMcg: number) => {
+    const concMcgPerMl = (vialMg * 1000) / bacWaterMl;
+    const drawMl = desiredDoseMcg / concMcgPerMl;
+    return {
+      inputs: { vial_mg: vialMg, bac_water_ml: bacWaterMl, desired_dose_mcg: desiredDoseMcg },
+      concentration_mcg_per_ml: Math.round(concMcgPerMl),
+      concentration_mg_per_ml: Number((concMcgPerMl / 1000).toFixed(3)),
+      draw_ml: Number(drawMl.toFixed(3)),
+      draw_units_u100: Number((drawMl * 100).toFixed(1)),
+      doses_per_vial: Math.floor((vialMg * 1000) / desiredDoseMcg),
+      note: 'U-100 insulin syringe: 1 mL = 100 units. Educational arithmetic only.',
+    };
+  };
+  const runTool = (name: string, input: any) => {
+    try {
+      if (name === 'reconstitution_calculator')
+        return calcRecon(Number(input.vial_mg), Number(input.bac_water_ml), Number(input.desired_dose_mcg));
+      if (name === 'check_peptide_interactions')
+        return checkStack(Array.isArray(input.substances) ? input.substances : []);
+      return { error: 'unknown tool: ' + name };
+    } catch (e) {
+      return { error: e instanceof Error ? e.message : 'tool error' };
+    }
+  };
+
   const stream = new ReadableStream({
     async start(controller) {
+      const sendText = (text: string) =>
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
       try {
-        const anthropicStream = client.messages.stream({
-          model,
-          max_tokens: maxTokens,
-          system,
-          messages,
-          tools: tools as any,
-        });
+        // Agentic loop: stream text, run any custom tool calls, continue until the model stops.
+        for (let turn = 0; turn < 6; turn++) {
+          const s = client.messages.stream({
+            model,
+            max_tokens: maxTokens,
+            system,
+            messages: convo,
+            tools: tools as any,
+          });
 
-        for await (const event of anthropicStream) {
-          if (
-            event.type === 'content_block_delta' &&
-            event.delta.type === 'text_delta'
-          ) {
-            const data = `data: ${JSON.stringify({ text: event.delta.text })}\n\n`;
-            controller.enqueue(encoder.encode(data));
+          for await (const event of s) {
+            if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
+              sendText(event.delta.text);
+            }
           }
+
+          const finalMsg = await s.finalMessage();
+
+          // Long server-tool turns (e.g. web_search) can pause — resume with the same content.
+          if (finalMsg.stop_reason === 'pause_turn') {
+            convo.push({ role: 'assistant', content: finalMsg.content });
+            continue;
+          }
+          if (finalMsg.stop_reason !== 'tool_use') break;
+
+          const toolResults: any[] = [];
+          for (const block of finalMsg.content as any[]) {
+            if (block.type === 'tool_use') {
+              const result = runTool(block.name, block.input);
+              toolResults.push({
+                type: 'tool_result',
+                tool_use_id: block.id,
+                content: JSON.stringify(result),
+              });
+            }
+          }
+          if (!toolResults.length) break; // server tool (web_search) handled internally
+          convo.push({ role: 'assistant', content: finalMsg.content });
+          convo.push({ role: 'user', content: toolResults });
         }
         controller.enqueue(encoder.encode('data: [DONE]\n\n'));
       } catch (err) {
