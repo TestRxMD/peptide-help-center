@@ -1,6 +1,7 @@
-// AUTO-DERIVED from src/pages/InteractionCheckerPage.tsx for the AI interaction tool. Keep in sync if the checker dataset changes.
+// ⚙️  AUTO-GENERATED from src/pages/InteractionCheckerPage.tsx by scripts/gen-interactions.mjs.
+//     Do NOT edit by hand — edit the checker page, then run `npm run gen:interactions`
+//     (also runs automatically on every build via the `prebuild` hook).
 /* eslint-disable @typescript-eslint/no-unused-vars */
-// ── Types ─────────────────────────────────────────────────────────
 
 type SubType  = 'peptide' | 'medication';
 type Severity = 'synergistic' | 'compatible' | 'caution' | 'avoid';
@@ -83,6 +84,8 @@ const SUBSTANCES: Substance[] = [
   { id:'immunosuppressants', name:'Immunosuppressants',      type:'medication', subCat:'immunosuppressant', category:'Immune',            description:'Tacrolimus, cyclosporine, mycophenolate, biologics',           aliases:['tacrolimus','cyclosporine','prograf','humira'] },
   { id:'chemotherapy',       name:'Chemotherapy',            type:'medication', subCat:'chemo',             category:'Oncology',          description:'Any cytotoxic, targeted, or immunotherapy anti-cancer agent', aliases:['chemo','cancer treatment','cytotoxic'] },
 ];
+
+
 
 // ═════════════════════════════════════════════════════════════════
 // SPECIFIC INTERACTION DATABASE
@@ -622,7 +625,6 @@ function findInteraction(id1: string, id2: string): (InteractionDef | CategoryIn
 // ─────────────────────────────────────────────────────────────────
 // UI COMPONENTS
 // ─────────────────────────────────────────────────────────────────
-
 
 // ── AI tool wrapper ───────────────────────────────────────────────
 function _resolveId(input: string): string | null {

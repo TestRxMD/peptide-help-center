@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "gen:interactions": "node scripts/gen-interactions.mjs",
+    "prebuild": "node scripts/gen-interactions.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
