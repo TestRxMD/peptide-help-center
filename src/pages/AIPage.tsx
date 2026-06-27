@@ -135,13 +135,14 @@ async function streamChat(
   messages: { role: string; content: string }[],
   onChunk: (text: string) => void,
   onDone: () => void,
-  onError: (err: string) => void
+  onError: (err: string) => void,
+  mode: 'chat' | 'protocol' = 'chat'
 ) {
   try {
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages, mode }),
     });
 
     if (!res.ok) {
@@ -356,7 +357,8 @@ function AIContent() {
           setMessages(prev => [...prev, { role: 'assistant', content: `⚠️ **Error:** ${err}` }]);
         }
         setLoading(false);
-      }
+      },
+      'protocol'
     );
   }, [form, builderLoading, messages, appendChunk, user, sessionId]);
 

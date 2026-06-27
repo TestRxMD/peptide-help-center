@@ -1,4 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { KB } from './_kb';
+import type { KBEntry } from './_kb';
 
 export const config = { runtime: 'edge' };
 
@@ -150,6 +152,30 @@ When the user asks where to buy, or you list supplies, include:
 
 **Recommended source: Short Proteins — [www.shortproteins.com](https://www.shortproteins.com)**`;
 
+// ─── LIBRARY GROUNDING (answer from The Peptide Help Center's own guides) ─────
+const CATALOG = KB.map(e => `- ${e.name} [${e.category}] — ${e.oneLiner}`).join('\n');
+
+function retrieveGuides(query: string, max = 3): KBEntry[] {
+  const q = ' ' + query.toLowerCase() + ' ';
+  const scored = KB.map(e => {
+    let score = 0;
+    for (const a of e.aliases) {
+      const al = a.toLowerCase();
+      if (al.length >= 3 && q.includes(' ' + al)) score += al.length;
+    }
+    return { e, score };
+  }).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
+  return scored.slice(0, max).map(x => x.e);
+}
+
+function libraryGrounding(query: string): string {
+  const hits = retrieveGuides(query);
+  const retrieved = hits.length
+    ? hits.map(e => `### Library guide — ${e.name} (${e.category})\n${e.text}`).join('\n\n---\n\n')
+    : '(No exact library match for this question — use the catalog above, and use web_search for anything not covered. Never fabricate.)';
+  return `\n\n====================\n# THE PEPTIDE HELP CENTER LIBRARY — YOUR PRIMARY SOURCE OF TRUTH\nAnswer FROM the library first. When you use a guide, name it and point the user to https://www.peptidehelpcenter.com/library (they can open that compound there). The library has ${KB.length} guides.\n\n## Full catalog\n${CATALOG}\n\n## Retrieved guide(s) most relevant to the current question\n${retrieved}\n\n# WEB SEARCH\nUse the web_search tool ONLY for facts not covered by the library (e.g., current FDA/WADA status, brand-new studies, news). Prefer the library; use the web to fill gaps; never invent facts, numbers, or citations.\n====================`;
+}
+
 // ─── HANDLER ─────────────────────────────────────────────────────────────────
 export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'POST') {
@@ -164,7 +190,7 @@ export default async function handler(req: Request): Promise<Response> {
     );
   }
 
-  let body: { messages?: { role: string; content: string }[] };
+  let body: { messages?: { role: string; content: string }[]; mode?: string };
   try {
     body = await req.json();
   } catch {
@@ -178,6 +204,18 @@ export default async function handler(req: Request): Promise<Response> {
     content: m.content,
   }));
 
+  // Cheap model for general chat; top-tier model for full protocol generation.
+  const mode = body.mode === 'protocol' ? 'protocol' : 'chat';
+  const lastUser = [...messages].reverse().find(m => m.role === 'user')?.content ?? '';
+  const system = SYSTEM_PROMPT + libraryGrounding(lastUser);
+  const model = mode === 'protocol'
+    ? (process.env.PROTOCOL_MODEL || 'claude-opus-4-8')        // top-tier for full protocols
+    : (process.env.CHAT_MODEL || 'claude-haiku-4-5-20251001'); // fast/cheap for general chat
+  const maxTokens = mode === 'protocol' ? 4096 : 1536;
+  const tools = process.env.DISABLE_WEB_SEARCH
+    ? []
+    : [{ type: 'web_search_20250305', name: 'web_search', max_uses: 4 }];
+
   const client = new Anthropic({ apiKey });
 
   const encoder = new TextEncoder();
@@ -185,10 +223,11 @@ export default async function handler(req: Request): Promise<Response> {
     async start(controller) {
       try {
         const anthropicStream = client.messages.stream({
-          model: 'claude-opus-4-5',
-          max_tokens: 2048,
-          system: SYSTEM_PROMPT,
+          model,
+          max_tokens: maxTokens,
+          system,
           messages,
+          tools: tools as any,
         });
 
         for await (const event of anthropicStream) {
